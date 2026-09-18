@@ -25,12 +25,17 @@ class Schaken_Standen_Admin {
 		}, 'schaken-standen');
 		add_settings_field('source_path', __('Bronpad op de server', 'schaken-standen'), array(__CLASS__, 'source_path_field'), 'schaken-standen', 'schaken_standen_source');
 		add_settings_field('cache_minutes', __('Cacheduur (minuten)', 'schaken-standen'), array(__CLASS__, 'cache_field'), 'schaken-standen', 'schaken_standen_source');
+		add_settings_section('schaken_standen_internal', __('Indeling interne competitie', 'schaken-standen'), function () {
+			echo '<p>' . esc_html__('Herken de periode automatisch uit de titel (bijvoorbeeld Voorjaar 2026) en bepaal hieronder de knopvolgorde en eventuele kortere knopnaam.', 'schaken-standen') . '</p>';
+		}, 'schaken-standen');
+		add_settings_field('internal_group_order', __('Groepen en volgorde', 'schaken-standen'), array(__CLASS__, 'internal_group_order_field'), 'schaken-standen', 'schaken_standen_internal');
 	}
 
 	public static function sanitize($input) {
 		return array(
 			'source_path' => untrailingslashit(sanitize_text_field($input['source_path'] ?? '')),
 			'cache_minutes' => min(1440, max(1, absint($input['cache_minutes'] ?? 15))),
+			'internal_group_order' => sanitize_textarea_field($input['internal_group_order'] ?? ''),
 		);
 	}
 
@@ -42,6 +47,12 @@ class Schaken_Standen_Admin {
 	public static function cache_field() {
 		$settings = (new Schaken_Standen_Index())->settings();
 		printf('<input type="number" min="1" max="1440" name="schaken_standen_settings[cache_minutes]" value="%d">', absint($settings['cache_minutes']));
+	}
+
+	public static function internal_group_order_field() {
+		$settings = (new Schaken_Standen_Index())->settings();
+		printf('<textarea class="large-text code" rows="9" name="schaken_standen_settings[internal_group_order]">%s</textarea>', esc_textarea($settings['internal_group_order']));
+		echo '<p class="description">' . esc_html__('Eén regel per groep, van boven naar beneden. Gebruik “zoektekst | knopnaam”; de knopnaam is optioneel. De periode uit de titel wordt automatisch achter de knopnaam gezet. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
 	}
 
 	public static function refresh() {

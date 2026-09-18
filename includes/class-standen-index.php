@@ -13,6 +13,7 @@ class Schaken_Standen_Index {
 		return wp_parse_args($settings, array(
 			'source_path' => '',
 			'cache_minutes' => 15,
+			'internal_group_order' => "startersgroep | Startersgroep\npupillengroep | Pupillengroep\njuniorengroep | Juniorengroep\nverkennersgroep | Verkennersgroep\nmeesters-/kroongroep | Meesters-/Kroongroep\nmeestergroep | Meestergroep\nkroongroep | Kroongroep",
 		));
 	}
 

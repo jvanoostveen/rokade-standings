@@ -66,8 +66,11 @@ class Schaken_Standen_Renderer {
 			$categories[$competition['category']]['label'] = $competition['category_label'];
 			$categories[$competition['category']]['items'][] = $competition;
 		}
+		foreach ($categories as $key => $category) {
+			$categories[$key]['periods'] = $this->periods_for_category($season, $key, $category['items']);
+		}
 		$first_category = array_key_first($categories);
-		$first_item = $categories[$first_category]['items'][0];
+		$first_item = $categories[$first_category]['periods'][0]['items'][0];
 		$instance = 'schaken-standen-' . wp_generate_uuid4();
 
 		ob_start();
@@ -80,11 +83,18 @@ class Schaken_Standen_Renderer {
 			</nav>
 			<?php foreach ($categories as $key => $category) : ?>
 				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category-panel="<?php echo esc_attr($key); ?>">
-					<div class="schaken-standen__tabs" role="tablist" aria-label="<?php echo esc_attr($category['label']); ?>">
-						<?php foreach ($category['items'] as $position => $competition) : ?>
-							<button type="button" role="tab" class="schaken-standen__tab<?php echo 0 === $position ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-selected="<?php echo 0 === $position ? 'true' : 'false'; ?>"><?php echo esc_html($competition['title']); ?></button>
-						<?php endforeach; ?>
-					</div>
+					<?php $tab_number = 0; ?>
+					<?php foreach ($category['periods'] as $period) : ?>
+						<section class="schaken-standen__period">
+							<?php if ($period['label']) : ?><h3 class="schaken-standen__period-title"><?php echo esc_html($period['label']); ?></h3><?php endif; ?>
+							<div class="schaken-standen__tabs" role="tablist" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
+								<?php foreach ($period['items'] as $competition) : ?>
+									<?php $is_active = 0 === $tab_number++; ?>
+									<button type="button" role="tab" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
+								<?php endforeach; ?>
+							</div>
+						</section>
+					<?php endforeach; ?>
 					<div class="schaken-standen__views">
 						<?php if ($key === $first_category) : ?>
 							<?php echo $this->render_view_buttons($first_item); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -100,6 +110,96 @@ class Schaken_Standen_Renderer {
 		</section>
 		<?php
 		return ob_get_clean();
+	}
+
+	private function periods_for_category($season, $category, $items) {
+		if ('interne-competitie' !== $category) {
+			return array(array('label' => '', 'items' => $items));
+		}
+
+		$periods = array();
+		foreach ($items as $item) {
+			$period = $this->period_from_title($season, $item['title']);
+			if (!isset($periods[$period['key']])) {
+				$periods[$period['key']] = array(
+					'label' => $period['label'],
+					'sort' => $period['sort'],
+					'items' => array(),
+				);
+			}
+			$item['display_title'] = $this->internal_display_title($item['title'], $period['label']);
+			$periods[$period['key']]['items'][] = $item;
+		}
+
+		foreach ($periods as &$period) {
+			usort($period['items'], array($this, 'sort_internal_items'));
+		}
+		unset($period);
+		usort($periods, function ($a, $b) {
+			return $b['sort'] <=> $a['sort'];
+		});
+		return array_values($periods);
+	}
+
+	private function period_from_title($season, $title) {
+		if (preg_match('/\\b(voorjaar|najaar)\\s+(\\d{4})\\b/ui', $title, $matches)) {
+			$season_part = strtolower($matches[1]);
+			$year = (int) $matches[2];
+			$label = ('voorjaar' === $season_part ? __('Voorjaar', 'schaken-standen') : __('Najaar', 'schaken-standen')) . ' ' . $year;
+			return array(
+				'key' => $season_part . '-' . $year,
+				'label' => $label,
+				'sort' => ($year * 10) + ('voorjaar' === $season_part ? 2 : 1),
+			);
+		}
+
+		$sort = 0;
+		if (preg_match('/(\\d{4})/', $season, $matches)) {
+			$sort = ((int) $matches[1]) * 10;
+		}
+		return array(
+			'key' => 'season-' . sanitize_key($season),
+			'label' => sprintf(__('Seizoen %s', 'schaken-standen'), $season),
+			'sort' => $sort,
+		);
+	}
+
+	private function internal_group_rules() {
+		$settings = $this->index->settings();
+		$lines = preg_split('/\\r\\n|\\r|\\n/', (string) $settings['internal_group_order']);
+		$rules = array();
+		foreach ($lines as $line) {
+			$parts = array_map('trim', explode('|', $line, 2));
+			$needle = strtolower(remove_accents($parts[0]));
+			if ('' !== $needle) {
+				$rules[] = array('needle' => $needle, 'label' => isset($parts[1]) ? $parts[1] : '');
+			}
+		}
+		return $rules;
+	}
+
+	private function internal_display_title($title, $period_label) {
+		foreach ($this->internal_group_rules() as $rule) {
+			if (false !== strpos(strtolower(remove_accents($title)), $rule['needle']) && '' !== $rule['label']) {
+				return trim($rule['label'] . ' ' . $period_label);
+			}
+		}
+		return $title;
+	}
+
+	private function sort_internal_items($a, $b) {
+		$rules = $this->internal_group_rules();
+		$position_for = function ($title) use ($rules) {
+			$normalized = strtolower(remove_accents($title));
+			foreach ($rules as $position => $rule) {
+				if (false !== strpos($normalized, $rule['needle'])) {
+					return $position;
+				}
+			}
+			return count($rules);
+		};
+		$order = $position_for($a['title']) <=> $position_for($b['title']);
+		return $order ?: ($a['number'] <=> $b['number']);
 	}
 
 	private function render_view_buttons($competition) {

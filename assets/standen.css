@@ -5,6 +5,8 @@
 .schaken-standen__category.is-active, .schaken-standen__tab.is-active, .schaken-standen__view.is-active { background: var(--schaken-accent); border-color: var(--schaken-accent); color: #fff; }
 .schaken-standen__group { display: none; }
 .schaken-standen__group.is-active { display: block; }
+.schaken-standen__period + .schaken-standen__period { margin-top: 1.5rem; }
+.schaken-standen__period-title { margin: 0 0 .55rem; font-size: 1.15em; }
 .schaken-standen__content[aria-busy="true"] { min-height: 5rem; opacity: .55; }
 .schaken-standen__back { margin-bottom: 1rem; border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .45rem .7rem; font: inherit; cursor: pointer; }
 .schaken-standen__embedded { overflow-x: auto; color: inherit; font-family: inherit; }
