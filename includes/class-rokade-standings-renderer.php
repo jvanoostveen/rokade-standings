@@ -147,32 +147,33 @@ class Schaken_Standen_Renderer {
 		?>
 		<section class="schaken-standen" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-season="<?php echo esc_attr($season); ?>">
 			<?php if ($show_categories) : ?>
-				<nav class="schaken-standen__categories" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
+				<div class="schaken-standen__categories" role="group" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
 					<?php foreach ($categories as $key => $category) : ?>
-						<button type="button" class="schaken-standen__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>"><?php echo esc_html($category['label']); ?></button>
+						<button type="button" class="schaken-standen__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>" aria-pressed="<?php echo $key === $first_category ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($instance . '-' . $key); ?>"><?php echo esc_html($category['label']); ?></button>
 					<?php endforeach; ?>
-				</nav>
+				</div>
 			<?php endif; ?>
 			<?php foreach ($categories as $key => $category) : ?>
-				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category-panel="<?php echo esc_attr($key); ?>">
+				<?php $content_id = $instance . '-' . $key . '-content'; ?>
+				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" id="<?php echo esc_attr($instance . '-' . $key); ?>" data-category-panel="<?php echo esc_attr($key); ?>">
 					<?php $tab_number = 0; ?>
 					<?php foreach ($category['periods'] as $period) : ?>
 						<section class="schaken-standen__period">
 							<?php if ($period['label']) : ?><h3 class="schaken-standen__period-title"><?php echo esc_html($period['label']); ?></h3><?php endif; ?>
-							<div class="schaken-standen__tabs" role="tablist" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
+							<div class="schaken-standen__tabs" role="group" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
 								<?php foreach ($period['items'] as $competition) : ?>
 									<?php $is_active = 0 === $tab_number++; ?>
-									<button type="button" role="tab" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
+									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
 								<?php endforeach; ?>
 							</div>
 						</section>
 					<?php endforeach; ?>
-					<div class="schaken-standen__views">
+					<div class="schaken-standen__views" role="group" aria-label="<?php esc_attr_e('Weergave', 'schaken-standen'); ?>">
 						<?php if ($key === $first_category) : ?>
-							<?php echo $this->render_view_buttons($first_item); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->render_view_buttons($first_item, $content_id); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
 					</div>
-					<div class="schaken-standen__content" aria-live="polite">
+					<div class="schaken-standen__content" id="<?php echo esc_attr($content_id); ?>" role="region" aria-label="<?php esc_attr_e('Standen', 'schaken-standen'); ?>" aria-live="polite">
 						<?php if ($key === $first_category) : ?>
 							<?php echo $this->render_file($season, $first_item['ranking_file'], $iframe); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
@@ -297,7 +298,7 @@ class Schaken_Standen_Renderer {
 		return $order ?: ($a['number'] <=> $b['number']);
 	}
 
-	private function render_view_buttons($competition) {
+	private function render_view_buttons($competition, $content_id) {
 		$views = array(
 			array('label' => __('Ranglijst', 'schaken-standen'), 'file' => $competition['ranking_file'], 'compact' => false),
 			array('label' => __('Kruistabel', 'schaken-standen'), 'file' => $competition['cross_file'], 'compact' => true),
@@ -308,7 +309,8 @@ class Schaken_Standen_Renderer {
 			if (!$view['file']) {
 				continue;
 			}
-			$output .= '<button type="button" class="schaken-standen__view' . ($view['file'] === $competition['ranking_file'] ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '" data-compact="' . ($view['compact'] ? 'true' : 'false') . '">' . esc_html($view['label']) . '</button>';
+			$active = $view['file'] === $competition['ranking_file'];
+			$output .= '<button type="button" class="schaken-standen__view' . ($active ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '" data-compact="' . ($view['compact'] ? 'true' : 'false') . '" aria-pressed="' . ($active ? 'true' : 'false') . '" aria-controls="' . esc_attr($content_id) . '">' . esc_html($view['label']) . '</button>';
 		}
 		return $output;
 	}

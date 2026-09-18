@@ -51,7 +51,7 @@
             standings.setAttribute('inert', '');
             standings.setAttribute('aria-hidden', 'true');
           });
-          preview.querySelectorAll('a, button, [role="tab"], iframe, input, select, textarea').forEach(function (item) {
+          preview.querySelectorAll('a, button, iframe, input, select, textarea').forEach(function (item) {
             item.setAttribute('tabindex', '-1');
           });
         };
