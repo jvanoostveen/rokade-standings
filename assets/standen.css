@@ -6,6 +6,7 @@
 .schaken-standen__group { display: none; }
 .schaken-standen__group.is-active { display: block; }
 .schaken-standen__content[aria-busy="true"] { min-height: 5rem; opacity: .55; }
+.schaken-standen__back { margin-bottom: 1rem; border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .45rem .7rem; font: inherit; cursor: pointer; }
 .schaken-standen__embedded { overflow-x: auto; color: inherit; font-family: inherit; }
 .schaken-standen__embedded table { max-width: 100%; border-collapse: collapse; font: inherit !important; color: inherit !important; background: transparent !important; }
 .schaken-standen__embedded th, .schaken-standen__embedded td { padding: .35rem; border-color: currentColor; }
