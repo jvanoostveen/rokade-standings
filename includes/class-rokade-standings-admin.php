@@ -98,6 +98,9 @@ class Schaken_Standen_Admin {
 				<?php wp_nonce_field('schaken_standen_refresh'); submit_button(__('Nu opnieuw indexeren', 'schaken-standen'), 'secondary', 'submit', false); ?>
 			</form>
 			<hr>
+			<h2><?php esc_html_e('Blok-editor', 'schaken-standen'); ?></h2>
+			<p><?php esc_html_e('In de Gutenberg-editor is het blok “Rokade standen” beschikbaar. Kies daar seizoen, competitie en weergave via dropdowns in de blokzijbalk.', 'schaken-standen'); ?></p>
+			<hr>
 			<h2><?php esc_html_e('Shortcode', 'schaken-standen'); ?></h2>
 			<p><code>[rokade seizoen="2026-2027"]</code></p>
 			<p><?php esc_html_e('Optioneel: categorie="interne-competitie", categorie="doorgeefschaak" of categorie="snelschaken". Gebruik modus="iframe" voor de oorspronkelijke Rokade-weergave.', 'schaken-standen'); ?></p>

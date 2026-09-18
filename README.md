@@ -30,6 +30,10 @@ Handige varianten:
 [rokade seizoen="2025-2026" modus="iframe"]
 ```
 
+## Gutenberg-blok
+
+Naast de shortcode is er in de blok-editor het blok **Rokade standen**. Selecteer het blok en kies in de zijbalk het seizoen, de competitie en de weergave (inline of de oorspronkelijke Rokade-weergave). De opties worden samengesteld uit de actuele standenindex. Na het vernieuwen van die index zijn nieuwe seizoenen en competities ook in het blok beschikbaar.
+
 Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig ingelezen en krijgt de lettertypes, kleuren en links van het WordPress-thema mee. Interne naam- en detail-links wisselen alleen dit inhoudsvak en tonen een knop om terug te keren naar de ranglijst. De knoppen blijven altijd WordPress-native. Met `modus="iframe"` wordt de oorspronkelijke HTML via een beveiligde plugin-proxy getoond; dat is nuttig wanneer de originele Rokade-layout belangrijker is.
 
 Wanneer de export ze bevat, verschijnen bij iedere groep ook de knoppen **Kruistabel** en **Scoretabel**. Deze laden eveneens in-place.

@@ -13,13 +13,80 @@ class Schaken_Standen_Renderer {
 
 	public function register() {
 		add_shortcode('rokade', array($this, 'shortcode'));
-		add_action('wp_enqueue_scripts', array($this, 'register_assets'));
+		add_action('init', array($this, 'register_assets'), 5);
+		add_action('init', array($this, 'register_block'));
+		add_action('enqueue_block_editor_assets', array($this, 'localize_block_options'));
 		add_action('template_redirect', array($this, 'serve_source_file'));
 	}
 
 	public function register_assets() {
 		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), SCHAKEN_STANDEN_VERSION);
 		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), SCHAKEN_STANDEN_VERSION, true);
+		wp_register_script(
+			'schaken-standen-block-editor',
+			SCHAKEN_STANDEN_URL . 'assets/rokade-standings-block.js',
+			array('wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render'),
+			SCHAKEN_STANDEN_VERSION,
+			true
+		);
+	}
+
+	/** Registers the dynamic Gutenberg equivalent of the [rokade] shortcode. */
+	public function register_block() {
+		if (!function_exists('register_block_type')) {
+			return;
+		}
+
+		register_block_type('schaken-standen/rokade', array(
+			'api_version' => 3,
+			'title' => __('Rokade standen', 'schaken-standen'),
+			'description' => __('Toon Rokade-standen met instelbaar seizoen, competitie en weergave.', 'schaken-standen'),
+			'icon' => 'chart-bar',
+			'category' => 'widgets',
+			'attributes' => array(
+				'seizoen' => array('type' => 'string', 'default' => ''),
+				'categorie' => array('type' => 'string', 'default' => ''),
+				'modus' => array('type' => 'string', 'default' => 'inline'),
+			),
+			'editor_script' => 'schaken-standen-block-editor',
+			'style' => 'schaken-standen',
+			'editor_style' => 'schaken-standen',
+			'render_callback' => array($this, 'render_block'),
+			'supports' => array('html' => false),
+		));
+	}
+
+	/** Loads index-derived dropdown choices only in the block editor. */
+	public function localize_block_options() {
+		wp_localize_script('schaken-standen-block-editor', 'schakenStandenBlock', $this->block_options());
+	}
+
+	/** Supplies editor dropdown options from the current, cached standings index. */
+	private function block_options() {
+		$data = $this->index->get_index();
+		$season_categories = array();
+		foreach ($data['seasons'] as $season => $competitions) {
+			$categories = array();
+			foreach ($competitions as $competition) {
+				$categories[$competition['category']] = $competition['category_label'];
+			}
+			$season_categories[$season] = $categories;
+		}
+
+		return array(
+			'seasons' => array_keys($data['seasons']),
+			'seasonCategories' => $season_categories,
+			'labels' => array(
+				'latestSeason' => __('Meest recente seizoen', 'schaken-standen'),
+				'allCategories' => __('Alle competities', 'schaken-standen'),
+				'inline' => __('Inline (in de pagina)', 'schaken-standen'),
+				'iframe' => __('Oorspronkelijke Rokade-weergave', 'schaken-standen'),
+			),
+		);
+	}
+
+	public function render_block($attributes) {
+		return $this->shortcode(is_array($attributes) ? $attributes : array());
 	}
 
 	public function shortcode($attributes) {
