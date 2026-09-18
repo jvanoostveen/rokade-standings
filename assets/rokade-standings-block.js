@@ -12,18 +12,29 @@
     return data.sources || [];
   }
 
-  // An empty bron means "whatever the server picks", which is the first source.
+  // An empty bron means "whatever the server picks". That is the first source
+  // that actually yielded seasons, not simply the first configured one, so an
+  // unreachable first path must not decide the dropdowns here either.
+  function defaultSource() {
+    var all = sources();
+    for (var index = 0; index < all.length; index++) {
+      if ((all[index].seasons || []).length) return all[index];
+    }
+    return all[0] || null;
+  }
+
   function sourceFor(bron) {
     var all = sources();
     for (var index = 0; index < all.length; index++) {
       if (all[index].id === bron) return all[index];
     }
-    return all[0] || { seasons: [], seasonCategories: {} };
+    return defaultSource() || { seasons: [], seasonCategories: {} };
   }
 
   function sourceOptions() {
     var all = sources();
-    var fallback = all[0] ? all[0].label : '';
+    var preferred = defaultSource();
+    var fallback = preferred ? preferred.label : '';
     var options = [{
       value: '',
       label: (data.labels.defaultSource || __('Eerste bron', 'schaken-standen')) + (fallback ? ' (' + fallback + ')' : '')
