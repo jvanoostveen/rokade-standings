@@ -12,16 +12,29 @@
     }).finally(function () { content.removeAttribute('aria-busy'); });
   }
 
+  function endpointFor(root, file) {
+    var endpoint = new URL(window.location.href);
+    endpoint.searchParams.set('schaken_standen_season', root.dataset.season);
+    endpoint.searchParams.set('schaken_standen_file', file);
+    return endpoint.toString();
+  }
+
+  function showCompetition(root, content, file) {
+    var endpoint = endpointFor(root, file);
+    if (root.dataset.mode === 'iframe') {
+      content.innerHTML = '<iframe class="schaken-standen__frame" title="Standen" src="' + endpoint + '" loading="lazy"></iframe>';
+    } else {
+      loadInline(content, endpoint, false);
+    }
+  }
+
   document.addEventListener('click', function (event) {
     var back = event.target.closest('.schaken-standen__back');
     if (back) {
       var backRoot = back.closest('.schaken-standen');
       var activeTab = backRoot.querySelector('.schaken-standen__group.is-active .schaken-standen__tab.is-active');
       if (!activeTab) return;
-      var backUrl = new URL(window.location.href);
-      backUrl.searchParams.set('schaken_standen_season', backRoot.dataset.season);
-      backUrl.searchParams.set('schaken_standen_file', activeTab.dataset.file);
-      loadInline(back.closest('.schaken-standen__content'), backUrl.toString(), false);
+      showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file);
       return;
     }
 
@@ -45,6 +58,14 @@
       var category = button.dataset.category;
       root.querySelectorAll('.schaken-standen__category').forEach(function (item) { item.classList.toggle('is-active', item === button); });
       root.querySelectorAll('.schaken-standen__group').forEach(function (item) { item.classList.toggle('is-active', item.dataset.categoryPanel === category); });
+      var group = root.querySelector('.schaken-standen__group[data-category-panel="' + category + '"]');
+      var firstTab = group.querySelector('.schaken-standen__tab');
+      group.querySelectorAll('.schaken-standen__tab').forEach(function (item) {
+        var active = item === firstTab;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      showCompetition(root, group.querySelector('.schaken-standen__content'), firstTab.dataset.file);
       return;
     }
 
@@ -54,14 +75,6 @@
       item.setAttribute('aria-selected', active ? 'true' : 'false');
     });
     var content = button.closest('.schaken-standen__group').querySelector('.schaken-standen__content');
-    var season = root.dataset.season;
-    var endpoint = new URL(window.location.href);
-    endpoint.searchParams.set('schaken_standen_season', season);
-    endpoint.searchParams.set('schaken_standen_file', button.dataset.file);
-    if (root.dataset.mode === 'iframe') {
-      content.innerHTML = '<iframe class="schaken-standen__frame" title="Standen" src="' + endpoint.toString() + '" loading="lazy"></iframe>';
-    } else {
-      loadInline(content, endpoint.toString(), false);
-    }
+    showCompetition(root, content, button.dataset.file);
   });
 }());
