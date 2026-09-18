@@ -1,4 +1,4 @@
-# Standen op disk
+# Rokade Standen
 
 WordPress-plugin voor de HTML-standen die Rokade naar een map op de server schrijft. De plugin scant uitsluitend de kleine `C*Index.htm`-bestanden. Hun `<title>` wordt de knoptekst; titels met “Doorgeef” en “Snelschaak” vormen automatisch die categorieën, de rest valt onder **Interne competitie**.
 
@@ -10,7 +10,7 @@ De cache voorkomt dat bij elke paginaview de directory wordt doorzocht. De index
 docker compose up -d
 ```
 
-Plaats eerst lokaal een Rokade-export onder `docs/current/standen/` (deze map staat bewust in `.gitignore`). Open daarna <http://localhost:8080>, voltooi de WordPress-installatie en activeer **Schaken in Hoogland – Standen op disk**. Ga naar **Instellingen → Schaken standen** en vul dit bronpad in:
+Plaats eerst lokaal een Rokade-export onder `docs/current/standen/` (deze map staat bewust in `.gitignore`). Open daarna <http://localhost:8080>, voltooi de WordPress-installatie en activeer **Rokade Standen**. Ga naar **Instellingen → Rokade Standen** en vul dit bronpad in:
 
 ```
 /standen

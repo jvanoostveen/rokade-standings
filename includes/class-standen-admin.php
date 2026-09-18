@@ -15,7 +15,7 @@ class Schaken_Standen_Admin {
 	}
 
 	public static function menu() {
-		add_options_page(__('Schaken standen', 'schaken-standen'), __('Schaken standen', 'schaken-standen'), 'manage_options', 'schaken-standen', array(__CLASS__, 'page'));
+		add_options_page(__('Rokade Standen', 'schaken-standen'), __('Rokade Standen', 'schaken-standen'), 'manage_options', 'schaken-standen', array(__CLASS__, 'page'));
 	}
 
 	public static function settings() {
@@ -63,7 +63,7 @@ class Schaken_Standen_Admin {
 		$index = (new Schaken_Standen_Index())->get_index();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e('Schaken standen', 'schaken-standen'); ?></h1>
+			<h1><?php esc_html_e('Rokade Standen', 'schaken-standen'); ?></h1>
 			<?php if (isset($_GET['schaken_standen_refreshed'])) : ?><div class="notice notice-success is-dismissible"><p><?php esc_html_e('Index vernieuwd.', 'schaken-standen'); ?></p></div><?php endif; ?>
 			<form action="options.php" method="post">
 				<?php settings_fields('schaken_standen'); do_settings_sections('schaken-standen'); submit_button(); ?>

@@ -33,7 +33,7 @@ class Schaken_Standen_Renderer {
 
 		if (!$season) {
 			return current_user_can('manage_options')
-				? '<p class="schaken-standen__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel het bronpad in onder Instellingen → Schaken standen.', 'schaken-standen') . '</p>'
+				? '<p class="schaken-standen__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel het bronpad in onder Instellingen → Rokade Standen.', 'schaken-standen') . '</p>'
 				: '';
 		}
 

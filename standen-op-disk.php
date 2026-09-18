@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Schaken in Hoogland – Standen op disk
+ * Plugin Name: Rokade Standen
  * Description: Indexeert Rokade-standenbestanden op disk en toont ze als toegankelijke, gestylede WordPress-tabs.
  * Version: 0.1.0
  * Requires at least: 6.5
