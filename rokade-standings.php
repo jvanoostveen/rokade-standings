@@ -73,6 +73,8 @@ function schaken_standen_deactivate() {
 register_deactivation_hook(__FILE__, 'schaken_standen_deactivate');
 
 add_action('plugins_loaded', function () {
+	// Not a wordpress.org plugin, so nothing loads the text domain for us.
+	load_plugin_textdomain('schaken-standen', false, dirname(plugin_basename(__FILE__)) . '/languages');
 	Schaken_Standen_Admin::register();
 	schaken_standen()->register();
 });
