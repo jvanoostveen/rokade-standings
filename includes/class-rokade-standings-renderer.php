@@ -47,22 +47,10 @@ class Schaken_Standen_Renderer {
 			return;
 		}
 
-		register_block_type('schaken-standen/rokade', array(
-			'api_version' => 3,
-			'title' => __('Rokade standen', 'schaken-standen'),
-			'description' => __('Toon Rokade-standen met instelbaar seizoen, competitie en weergave.', 'schaken-standen'),
-			'icon' => 'chart-bar',
-			'category' => 'widgets',
-			'attributes' => array(
-				'seizoen' => array('type' => 'string', 'default' => ''),
-				'categorie' => array('type' => 'string', 'default' => ''),
-				'modus' => array('type' => 'string', 'default' => 'inline'),
-			),
-			'editor_script' => 'schaken-standen-block-editor',
-			'style' => 'schaken-standen',
-			'editor_style' => 'schaken-standen',
+		// Everything but the callback lives in blocks/rokade/block.json, so the
+		// editor can read the same definition the server registers.
+		register_block_type(SCHAKEN_STANDEN_DIR . 'blocks/rokade', array(
 			'render_callback' => array($this, 'render_block'),
-			'supports' => array('html' => false),
 		));
 	}
 
