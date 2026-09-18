@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 
 class Schaken_Standen_Renderer {
 	private $index;
+	private $group_rules = null;
 
 	public function __construct($index) {
 		$this->index = $index;
@@ -216,7 +217,9 @@ class Schaken_Standen_Renderer {
 					'items' => array(),
 				);
 			}
-			$item['display_title'] = $this->internal_display_title($item['title']);
+			$match = $this->match_internal_group($item['title']);
+			$item['display_title'] = $match['label'];
+			$item['group_position'] = $match['position'];
 			$periods[$period['key']]['items'][] = $item;
 		}
 
@@ -254,6 +257,10 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function internal_group_rules() {
+		if (null !== $this->group_rules) {
+			return $this->group_rules;
+		}
+
 		$settings = $this->index->settings();
 		$lines = preg_split('/\\r\\n|\\r|\\n/', (string) $settings['internal_group_order']);
 		$rules = array();
@@ -265,7 +272,8 @@ class Schaken_Standen_Renderer {
 				$rules[] = array('needle' => $needle, 'label' => $label);
 			}
 		}
-		return $rules;
+		$this->group_rules = $rules;
+		return $this->group_rules;
 	}
 
 	private function normalize_internal_group_name($value) {
@@ -274,27 +282,23 @@ class Schaken_Standen_Renderer {
 		return trim(preg_replace('/\\s+/', ' ', $normalized));
 	}
 
-	private function internal_display_title($title) {
-		foreach ($this->internal_group_rules() as $rule) {
-			if (false !== strpos($this->normalize_internal_group_name($title), $rule['needle']) && '' !== $rule['label']) {
-				return $rule['label'];
+	/** Resolves a title to its configured button label and sort position in one pass. */
+	private function match_internal_group($title) {
+		$rules = $this->internal_group_rules();
+		$normalized = $this->normalize_internal_group_name($title);
+		foreach ($rules as $position => $rule) {
+			if (false !== strpos($normalized, $rule['needle'])) {
+				return array(
+					'label' => '' !== $rule['label'] ? $rule['label'] : $title,
+					'position' => $position,
+				);
 			}
 		}
-		return $title;
+		return array('label' => $title, 'position' => count($rules));
 	}
 
 	private function sort_internal_items($a, $b) {
-		$rules = $this->internal_group_rules();
-		$position_for = function ($title) use ($rules) {
-			$normalized = $this->normalize_internal_group_name($title);
-			foreach ($rules as $position => $rule) {
-				if (false !== strpos($normalized, $rule['needle'])) {
-					return $position;
-				}
-			}
-			return count($rules);
-		};
-		$order = $position_for($a['title']) <=> $position_for($b['title']);
+		$order = $a['group_position'] <=> $b['group_position'];
 		return $order ?: ($a['number'] <=> $b['number']);
 	}
 
