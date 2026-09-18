@@ -26,9 +26,13 @@ class Schaken_Standen_Admin {
 		add_settings_field('source_path', __('Bronpad op de server', 'schaken-standen'), array(__CLASS__, 'source_path_field'), 'schaken-standen', 'schaken_standen_source');
 		add_settings_field('cache_minutes', __('Cacheduur (minuten)', 'schaken-standen'), array(__CLASS__, 'cache_field'), 'schaken-standen', 'schaken_standen_source');
 		add_settings_section('schaken_standen_internal', __('Indeling interne competitie', 'schaken-standen'), function () {
-			echo '<p>' . esc_html__('Herken de periode automatisch uit de titel (bijvoorbeeld Voorjaar 2026) en bepaal hieronder de knopvolgorde en eventuele kortere knopnaam.', 'schaken-standen') . '</p>';
+			echo '<p>' . esc_html__('De periode wordt automatisch uit de titel herkend (bijvoorbeeld Voorjaar 2026). Benoem hieronder alleen de groepen, in de gewenste knopvolgorde.', 'schaken-standen') . '</p>';
 		}, 'schaken-standen');
 		add_settings_field('internal_group_order', __('Groepen en volgorde', 'schaken-standen'), array(__CLASS__, 'internal_group_order_field'), 'schaken-standen', 'schaken_standen_internal');
+		add_settings_section('schaken_standen_blocks', __('Knopnamen voor blokcompetities', 'schaken-standen'), function () {
+			echo '<p>' . esc_html__('Pas de labels voor doorgeefschaak en snelschaken aan zonder de exportbestanden te wijzigen.', 'schaken-standen') . '</p>';
+		}, 'schaken-standen');
+		add_settings_field('block_button_templates', __('Blokknoppen', 'schaken-standen'), array(__CLASS__, 'block_button_templates_field'), 'schaken-standen', 'schaken_standen_blocks');
 	}
 
 	public static function sanitize($input) {
@@ -36,6 +40,7 @@ class Schaken_Standen_Admin {
 			'source_path' => untrailingslashit(sanitize_text_field($input['source_path'] ?? '')),
 			'cache_minutes' => min(1440, max(1, absint($input['cache_minutes'] ?? 15))),
 			'internal_group_order' => sanitize_textarea_field($input['internal_group_order'] ?? ''),
+			'block_button_templates' => sanitize_textarea_field($input['block_button_templates'] ?? ''),
 		);
 	}
 
@@ -52,7 +57,13 @@ class Schaken_Standen_Admin {
 	public static function internal_group_order_field() {
 		$settings = (new Schaken_Standen_Index())->settings();
 		printf('<textarea class="large-text code" rows="9" name="schaken_standen_settings[internal_group_order]">%s</textarea>', esc_textarea($settings['internal_group_order']));
-			echo '<p class="description">' . esc_html__('Eén regel per groep, van boven naar beneden. Gebruik “zoektekst | knopnaam”; de knopnaam is optioneel. De periode wordt als kop boven de knoppen getoond. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
+		echo '<p class="description">' . esc_html__('Eén groep per regel. Deze tekst wordt ook de knopnaam. De plugin negeert automatisch “groep” in de bestandsnaam; “Starters” herkent dus bijvoorbeeld “Startersgroep Voorjaar 2026”. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
+	}
+
+	public static function block_button_templates_field() {
+		$settings = (new Schaken_Standen_Index())->settings();
+		printf('<textarea class="large-text code" rows="3" name="schaken_standen_settings[block_button_templates]">%s</textarea>', esc_textarea($settings['block_button_templates']));
+		echo '<p class="description">' . esc_html__('Eén regel per categorie, in de vorm “categorie | knopnaam”. Gebruik {nummer} voor het bloknummer uit de titel, bijvoorbeeld “snelschaken | Blok {nummer}”.', 'schaken-standen') . '</p>';
 	}
 
 	public static function refresh() {

@@ -116,8 +116,17 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function category_display_title($category, $title) {
-		if (in_array($category, array('doorgeefschaak', 'snelschaken'), true) && preg_match('/\\bblok\\s+(\\d+)\\b/ui', $title, $matches)) {
-			return sprintf(__('Blok %d', 'schaken-standen'), (int) $matches[1]);
+		if (!in_array($category, array('doorgeefschaak', 'snelschaken'), true) || !preg_match('/\\bblok\\s+(\\d+)\\b/ui', $title, $matches)) {
+			return $title;
+		}
+
+		$settings = $this->index->settings();
+		$lines = preg_split('/\\r\\n|\\r|\\n/', (string) $settings['block_button_templates']);
+		foreach ($lines as $line) {
+			$parts = array_map('trim', explode('|', $line, 2));
+			if (2 === count($parts) && sanitize_title($parts[0]) === $category && '' !== $parts[1]) {
+				return str_replace('{nummer}', (string) ((int) $matches[1]), $parts[1]);
+			}
 		}
 		return $title;
 	}
@@ -180,17 +189,24 @@ class Schaken_Standen_Renderer {
 		$rules = array();
 		foreach ($lines as $line) {
 			$parts = array_map('trim', explode('|', $line, 2));
-			$needle = strtolower(remove_accents($parts[0]));
+			$label = isset($parts[1]) ? $parts[1] : $parts[0];
+			$needle = $this->normalize_internal_group_name($parts[0]);
 			if ('' !== $needle) {
-				$rules[] = array('needle' => $needle, 'label' => isset($parts[1]) ? $parts[1] : '');
+				$rules[] = array('needle' => $needle, 'label' => $label);
 			}
 		}
 		return $rules;
 	}
 
+	private function normalize_internal_group_name($value) {
+		$normalized = strtolower(remove_accents($value));
+		$normalized = str_replace(array('groep', 'meesters-/'), array('', 'meester-/'), $normalized);
+		return trim(preg_replace('/\\s+/', ' ', $normalized));
+	}
+
 	private function internal_display_title($title) {
 		foreach ($this->internal_group_rules() as $rule) {
-			if (false !== strpos(strtolower(remove_accents($title)), $rule['needle']) && '' !== $rule['label']) {
+			if (false !== strpos($this->normalize_internal_group_name($title), $rule['needle']) && '' !== $rule['label']) {
 				return $rule['label'];
 			}
 		}
@@ -200,7 +216,7 @@ class Schaken_Standen_Renderer {
 	private function sort_internal_items($a, $b) {
 		$rules = $this->internal_group_rules();
 		$position_for = function ($title) use ($rules) {
-			$normalized = strtolower(remove_accents($title));
+			$normalized = $this->normalize_internal_group_name($title);
 			foreach ($rules as $position => $rule) {
 				if (false !== strpos($normalized, $rule['needle'])) {
 					return $position;
