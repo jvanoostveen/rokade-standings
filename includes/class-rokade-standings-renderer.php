@@ -137,6 +137,18 @@ class Schaken_Standen_Renderer {
 		foreach ($categories as $key => $category) {
 			$categories[$key]['periods'] = $this->periods_for_category($season, $key, $category['items']);
 		}
+
+		// Assign deep-link keys across the whole instance at once, so collisions
+		// between categories and periods can be resolved.
+		$used_keys = array();
+		foreach ($categories as $category_key => $category) {
+			foreach ($category['periods'] as $period_index => $period) {
+				foreach ($period['items'] as $item_index => $item) {
+					$categories[$category_key]['periods'][$period_index]['items'][$item_index]['url_key'] = $this->competition_url_key($item, $used_keys);
+				}
+			}
+		}
+
 		$first_category = array_key_first($categories);
 		$first_item = $categories[$first_category]['periods'][0]['items'][0];
 		$instance = 'schaken-standen-' . wp_generate_uuid4();
@@ -161,7 +173,7 @@ class Schaken_Standen_Renderer {
 							<div class="schaken-standen__tabs" role="group" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
 								<?php foreach ($period['items'] as $competition) : ?>
 									<?php $is_active = 0 === $tab_number++; ?>
-									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-competition="<?php echo esc_attr($this->competition_url_key($competition)); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
+									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-competition="<?php echo esc_attr($competition['url_key']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
 								<?php endforeach; ?>
 							</div>
 						</section>
@@ -183,9 +195,25 @@ class Schaken_Standen_Renderer {
 		return ob_get_clean();
 	}
 
-	private function competition_url_key($competition) {
+	/**
+	 * Deep-link key for one competition. Titles are not guaranteed unique across
+	 * a season -- the same group name can appear in two directories -- so keys
+	 * are disambiguated against the ones already handed out for this render.
+	 */
+	private function competition_url_key($competition, &$used) {
 		$key = sanitize_title($competition['title']);
-		return '' !== $key ? $key : 'competitie-' . absint($competition['number']);
+		if ('' === $key) {
+			$key = 'competitie-' . absint($competition['number']);
+		}
+
+		$candidate = $key;
+		$suffix = 2;
+		while (isset($used[$candidate])) {
+			$candidate = $key . '-' . $suffix;
+			$suffix++;
+		}
+		$used[$candidate] = true;
+		return $candidate;
 	}
 
 	private function category_display_title($category, $title) {

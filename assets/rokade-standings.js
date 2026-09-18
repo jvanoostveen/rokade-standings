@@ -30,6 +30,8 @@
 
   function endpointFor(root, file) {
     var endpoint = new URL(window.location.href);
+    endpoint.searchParams.delete('rokade_categorie');
+    endpoint.searchParams.delete('rokade_competitie');
     endpoint.searchParams.set('schaken_standen_season', root.dataset.season);
     endpoint.searchParams.set('schaken_standen_file', file);
     return endpoint.toString();
@@ -84,9 +86,33 @@
     return null;
   }
 
-  function activateCompetition(root, category, requestedCompetition) {
+  function tabFor(group, competition) {
+    if (!competition) return null;
+    var tabs = group.querySelectorAll('.schaken-standen__tab');
+    for (var index = 0; index < tabs.length; index++) {
+      if (tabs[index].dataset.competition === competition) return tabs[index];
+    }
+    return null;
+  }
+
+  // fromUrl: this selection came from the query string rather than a click, so
+  // an unknown competition must be left alone instead of falling back to the
+  // first tab -- otherwise a second block on the same page, which reads the very
+  // same parameters, would jump somewhere the visitor never asked for.
+  function activateCompetition(root, category, requestedCompetition, fromUrl) {
     var group = groupFor(root, category);
     if (!group) return null;
+
+    var tab = tabFor(group, requestedCompetition);
+    if (!tab) {
+      if (fromUrl && requestedCompetition) return null;
+      tab = group.querySelector('.schaken-standen__tab');
+    }
+    if (!tab) return null;
+
+    var content = group.querySelector('.schaken-standen__content');
+    // The server already inlined this exact view, so restoring it needs no fetch.
+    var alreadyRendered = tab.classList.contains('is-active') && content && content.children.length > 0;
 
     root.querySelectorAll('.schaken-standen__category').forEach(function (item) {
       var active = item.dataset.category === category;
@@ -96,25 +122,16 @@
     root.querySelectorAll('.schaken-standen__group').forEach(function (item) {
       item.classList.toggle('is-active', item === group);
     });
-
-    var tabs = group.querySelectorAll('.schaken-standen__tab');
-    var tab = null;
-    for (var index = 0; index < tabs.length; index++) {
-      if (tabs[index].dataset.competition === requestedCompetition || tabs[index].dataset.file === requestedCompetition) {
-        tab = tabs[index];
-        break;
-      }
-    }
-    tab = tab || tabs[0];
-    if (!tab) return null;
-
-    tabs.forEach(function (item) {
+    group.querySelectorAll('.schaken-standen__tab').forEach(function (item) {
       var active = item === tab;
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
-    updateViews(group, tab, tab.dataset.file);
-    showCompetition(root, group.querySelector('.schaken-standen__content'), tab.dataset.file, false);
+
+    if (!(fromUrl && alreadyRendered)) {
+      updateViews(group, tab, tab.dataset.file);
+      showCompetition(root, content, tab.dataset.file, false);
+    }
     return { group: group, tab: tab };
   }
 
@@ -130,11 +147,14 @@
     var category = url.searchParams.get('rokade_categorie');
     var competition = url.searchParams.get('rokade_competitie');
     if (!category && competition) {
-      root.querySelectorAll('.schaken-standen__tab').forEach(function (tab) {
-        if (tab.dataset.competition === competition || tab.dataset.file === competition) category = tab.closest('.schaken-standen__group').dataset.categoryPanel;
-      });
+      var tabs = root.querySelectorAll('.schaken-standen__tab');
+      for (var index = 0; index < tabs.length && !category; index++) {
+        if (tabs[index].dataset.competition === competition) {
+          category = tabs[index].closest('.schaken-standen__group').dataset.categoryPanel;
+        }
+      }
     }
-    if (category) activateCompetition(root, category, competition);
+    if (category) activateCompetition(root, category, competition, true);
   }
 
   document.addEventListener('click', function (event) {
@@ -176,13 +196,13 @@
     if (!root) return;
 
     if (button.classList.contains('schaken-standen__category')) {
-      var categorySelection = activateCompetition(root, button.dataset.category, '');
+      var categorySelection = activateCompetition(root, button.dataset.category, null, false);
       if (categorySelection) saveCompetitionInUrl(root, categorySelection.group, categorySelection.tab);
       return;
     }
 
     var tabGroup = button.closest('.schaken-standen__group');
-    var tabSelection = activateCompetition(root, tabGroup.dataset.categoryPanel, button.dataset.file);
+    var tabSelection = activateCompetition(root, tabGroup.dataset.categoryPanel, button.dataset.competition, false);
     if (tabSelection) saveCompetitionInUrl(root, tabSelection.group, tabSelection.tab);
   });
 
