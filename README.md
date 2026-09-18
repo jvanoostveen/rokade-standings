@@ -34,6 +34,10 @@ Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig in
 
 De waarde van `seizoen` moet exact de naam van een geïndexeerde submap zijn, bijvoorbeeld `2026-2027`, `voorjaar-2026` of `archief`. Een afwijkende waarde toont geen standen en kan nooit naar bestanden buiten de ingestelde standenmap verwijzen.
 
+## Lokale thema's
+
+`docs/themes/` wordt read-only gemount naar `wp-content/themes/`. De lokale testinstallatie gebruikt `hoogland-2023-dev` als child theme; de vereiste parent `hoogland` staat in dezelfde map.
+
 Stop de lokale omgeving desgewenst weer met `docker compose down`. De database en WordPress-installatie blijven dan in de Docker-volumes bewaard.
 
 ## Productiebron
