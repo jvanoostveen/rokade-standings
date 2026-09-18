@@ -54,7 +54,7 @@ class Schaken_Standen_Renderer {
 
 	private function choose_season($seasons, $requested) {
 		if ($requested) {
-			return preg_match('/^\d{4}-\d{4}$/D', $requested) && isset($seasons[$requested]) ? $requested : '';
+			return isset($seasons[$requested]) ? $requested : '';
 		}
 		$available = array_keys($seasons);
 		return $available ? end($available) : '';
@@ -137,7 +137,11 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function get_file_contents($season, $relative_file) {
-		if (!preg_match('/^\d{4}-\d{4}$/', $season) || !preg_match('/^[A-Za-z0-9_ .\/()-]+\.html?$/i', $relative_file)) {
+		if (basename($season) !== $season || false !== strpos($season, "\0") || !preg_match('/^[A-Za-z0-9_ .\/()-]+\.html?$/i', $relative_file)) {
+			return null;
+		}
+		$known_seasons = $this->index->get_index();
+		if (!isset($known_seasons['seasons'][$season])) {
 			return null;
 		}
 		$root = realpath($this->index->source_path());

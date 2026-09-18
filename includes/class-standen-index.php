@@ -47,10 +47,6 @@ class Schaken_Standen_Index {
 
 		foreach ($season_dirs as $season_path) {
 			$season = basename($season_path);
-			if (!preg_match('/^\d{4}-\d{4}$/', $season)) {
-				continue;
-			}
-
 			$competitions = array();
 			$files = glob($season_path . '/*/C*Index.htm');
 			if (!$files) {
