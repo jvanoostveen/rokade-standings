@@ -1,14 +1,30 @@
 (function () {
+  var l10n = window.schakenStandenL10n || {};
+
+  function text(key, fallback) {
+    return l10n[key] || fallback;
+  }
+
   function loadInline(content, url, showBack) {
     content.setAttribute('aria-busy', 'true');
     fetch(url, { credentials: 'same-origin' }).then(function (response) {
-      if (!response.ok) throw new Error('Bestand niet beschikbaar');
+      if (!response.ok) throw new Error('Unavailable: ' + url);
       return response.text();
     }).then(function (html) {
-      var back = showBack ? '<button type="button" class="schaken-standen__back">Terug naar ranglijst</button>' : '';
-      content.innerHTML = back + '<div class="schaken-standen__embedded">' + html + '</div>';
+      var embedded = document.createElement('div');
+      embedded.className = 'schaken-standen__embedded';
+      embedded.innerHTML = html;
+      content.textContent = '';
+      if (showBack) {
+        var back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'schaken-standen__back';
+        back.textContent = text('back', 'Terug naar ranglijst');
+        content.appendChild(back);
+      }
+      content.appendChild(embedded);
     }).catch(function () {
-      content.textContent = 'Dit standenbestand kan niet worden geladen.';
+      content.textContent = text('loadError', 'Dit standenbestand kan niet worden geladen.');
     }).finally(function () { content.removeAttribute('aria-busy'); });
   }
 
@@ -23,7 +39,13 @@
     content.classList.toggle('is-compact-view', Boolean(compact));
     var endpoint = endpointFor(root, file);
     if (root.dataset.mode === 'iframe') {
-      content.innerHTML = '<iframe class="schaken-standen__frame" title="Standen" src="' + endpoint + '" loading="lazy"></iframe>';
+      var frame = document.createElement('iframe');
+      frame.className = 'schaken-standen__frame';
+      frame.title = text('frameTitle', 'Standen');
+      frame.loading = 'lazy';
+      frame.src = endpoint;
+      content.textContent = '';
+      content.appendChild(frame);
     } else {
       loadInline(content, endpoint, false);
     }
@@ -34,9 +56,9 @@
     if (!views) return;
     var content = group.querySelector('.schaken-standen__content');
     var options = [
-      { label: 'Ranglijst', file: tab.dataset.file, compact: false },
-      { label: 'Kruistabel', file: tab.dataset.crossFile, compact: true },
-      { label: 'Scoretabel', file: tab.dataset.scoreFile, compact: true }
+      { label: text('ranking', 'Ranglijst'), file: tab.dataset.file, compact: false },
+      { label: text('cross', 'Kruistabel'), file: tab.dataset.crossFile, compact: true },
+      { label: text('score', 'Scoretabel'), file: tab.dataset.scoreFile, compact: true }
     ];
     views.textContent = '';
     options.forEach(function (option) {
