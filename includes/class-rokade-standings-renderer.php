@@ -397,10 +397,37 @@ class Schaken_Standen_Renderer {
 			return $matches[1] . '=' . $matches[2] . esc_url($this->file_url($season, $relative)) . $matches[2];
 		}, $html);
 
+		// Merge onto the post defaults; assigning would drop scope/headers/abbr on
+		// table cells and rel on links, which is exactly what keeps a standings
+		// table readable in a screen reader.
+		$common = array('class' => true, 'style' => true, 'align' => true);
+		$extra = array(
+			'table' => $common + array('border' => true, 'cellspacing' => true, 'cellpadding' => true),
+			'thead' => $common,
+			'tbody' => $common,
+			'tr' => $common,
+			'td' => $common + array('colspan' => true, 'rowspan' => true),
+			'th' => $common + array('colspan' => true, 'rowspan' => true, 'scope' => true),
+			'font' => array('class' => true, 'size' => true, 'color' => true, 'face' => true),
+			'div' => $common,
+			'span' => $common,
+			'p' => $common,
+			'br' => array('class' => true),
+			'a' => $common + array('href' => true, 'title' => true, 'rel' => true),
+			'b' => $common,
+			'i' => $common,
+			'strong' => $common,
+			'em' => $common,
+		);
+
 		$allowed = wp_kses_allowed_html('post');
-		foreach (array('table', 'thead', 'tbody', 'tr', 'td', 'th', 'font', 'div', 'span', 'p', 'br', 'a', 'b', 'i', 'strong', 'em') as $tag) {
-			$allowed[$tag] = array('class' => true, 'style' => true, 'align' => true, 'border' => true, 'cellspacing' => true, 'colspan' => true, 'rowspan' => true, 'href' => true, 'target' => true, 'size' => true);
+		foreach ($extra as $tag => $attributes) {
+			$allowed[$tag] = isset($allowed[$tag]) ? array_merge($allowed[$tag], $attributes) : $attributes;
 		}
+		// Every link is rewritten to our own endpoint and handled inline by the
+		// script; a stray target from a legacy export would open a bare fragment
+		// in a new tab instead, without rel="noopener".
+		unset($allowed['a']['target']);
 		return wp_kses($html, $allowed);
 	}
 }
