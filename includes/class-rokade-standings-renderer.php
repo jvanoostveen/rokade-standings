@@ -371,7 +371,7 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function sanitize_and_rewrite_html($season, $relative_directory, $html) {
-		$html = $this->convert_to_utf8($html);
+		$html = $this->index->to_utf8($html);
 		$html = preg_replace('/<!doctype[^>]*>|<\/?(?:html|head|body)[^>]*>|<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>|<script[^>]*>.*?<\/script>/is', '', $html);
 		$html = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($season, $relative_directory) {
 			$target = html_entity_decode($matches[3], ENT_QUOTES, 'UTF-8');
@@ -387,21 +387,5 @@ class Schaken_Standen_Renderer {
 			$allowed[$tag] = array('class' => true, 'style' => true, 'align' => true, 'border' => true, 'cellspacing' => true, 'colspan' => true, 'rowspan' => true, 'href' => true, 'target' => true, 'size' => true);
 		}
 		return wp_kses($html, $allowed);
-	}
-
-	private function convert_to_utf8($html) {
-		if (1 === preg_match('//u', $html)) {
-			return $html;
-		}
-		if (function_exists('mb_convert_encoding')) {
-			return mb_convert_encoding($html, 'UTF-8', 'Windows-1252');
-		}
-		if (function_exists('iconv')) {
-			$converted = @iconv('Windows-1252', 'UTF-8//IGNORE', $html);
-			if (false !== $converted) {
-				return $converted;
-			}
-		}
-		return $html;
 	}
 }

@@ -108,13 +108,34 @@ class Schaken_Standen_Index {
 		);
 	}
 
+	/**
+	 * Rokade exports are Windows-1252; everything downstream (transients, esc_html)
+	 * assumes UTF-8, so convert before the bytes leave the file.
+	 */
+	public function to_utf8($html) {
+		if (1 === preg_match('//u', $html)) {
+			return $html;
+		}
+		if (function_exists('mb_convert_encoding')) {
+			return mb_convert_encoding($html, 'UTF-8', 'Windows-1252');
+		}
+		if (function_exists('iconv')) {
+			$converted = @iconv('Windows-1252', 'UTF-8//IGNORE', $html);
+			if (false !== $converted) {
+				return $converted;
+			}
+		}
+		return $html;
+	}
+
 	private function read_title($file) {
 		$contents = @file_get_contents($file, false, null, 0, 8192);
 		if (false === $contents || !preg_match('/<title[^>]*>(.*?)<\/title>/is', $contents, $matches)) {
 			return '';
 		}
 
-		return trim(html_entity_decode(wp_strip_all_tags($matches[1]), ENT_QUOTES | ENT_HTML5, 'ISO-8859-1'));
+		$title = $this->to_utf8($matches[1]);
+		return trim(html_entity_decode(wp_strip_all_tags($title), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 	}
 
 	private function category_for($title) {
