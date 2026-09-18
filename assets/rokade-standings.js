@@ -31,6 +31,7 @@
   function endpointFor(root, file) {
     var endpoint = new URL(window.location.href);
     endpoint.searchParams.delete('rokade_bron');
+    endpoint.searchParams.delete('rokade_seizoen');
     endpoint.searchParams.delete('rokade_categorie');
     endpoint.searchParams.delete('rokade_competitie');
     endpoint.searchParams.set('schaken_standen_source', root.dataset.source);
@@ -54,6 +55,14 @@
     } else {
       loadInline(content, endpoint, false);
     }
+  }
+
+  function markActiveView(group, file) {
+    group.querySelectorAll('.schaken-standen__view').forEach(function (item) {
+      var active = item.dataset.file === file;
+      item.classList.toggle('is-active', active);
+      item.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
   }
 
   function updateViews(group, tab, activeFile) {
@@ -140,6 +149,7 @@
   function saveCompetitionInUrl(root, group, tab) {
     var url = new URL(window.location.href);
     url.searchParams.set('rokade_bron', root.dataset.source);
+    url.searchParams.set('rokade_seizoen', root.dataset.season);
     url.searchParams.set('rokade_categorie', group.dataset.categoryPanel);
     url.searchParams.set('rokade_competitie', tab.dataset.competition);
     window.history.replaceState(window.history.state, '', url.toString());
@@ -147,10 +157,13 @@
 
   function restoreCompetitionFromUrl(root) {
     var url = new URL(window.location.href);
-    // Two blocks on one page can show different sources; the link belongs to the
-    // one it was saved from, not to whichever block happens to share a tab name.
+    // Two blocks on one page can show different sources, or the same source in
+    // two seasons; the link belongs to the block it was saved from, not to
+    // whichever block happens to share a tab name.
     var source = url.searchParams.get('rokade_bron');
     if (source && source !== root.dataset.source) return;
+    var season = url.searchParams.get('rokade_seizoen');
+    if (season && season !== root.dataset.season) return;
     var category = url.searchParams.get('rokade_categorie');
     var competition = url.searchParams.get('rokade_competitie');
     if (!category && competition) {
@@ -168,8 +181,12 @@
     var back = event.target.closest('.schaken-standen__back');
     if (back) {
       var backRoot = back.closest('.schaken-standen');
+      var backGroup = back.closest('.schaken-standen__group');
       var activeTab = backRoot.querySelector('.schaken-standen__group.is-active .schaken-standen__tab.is-active');
       if (!activeTab) return;
+      // This shows the ranking again, so the ranking button -- not whichever
+      // table the visitor followed the link from -- is the one left pressed.
+      if (backGroup) markActiveView(backGroup, activeTab.dataset.file);
       showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file, false);
       return;
     }
@@ -178,10 +195,7 @@
     if (view) {
       var viewGroup = view.closest('.schaken-standen__group');
       var viewRoot = view.closest('.schaken-standen');
-      viewGroup.querySelectorAll('.schaken-standen__view').forEach(function (item) {
-        item.classList.toggle('is-active', item === view);
-        item.setAttribute('aria-pressed', item === view ? 'true' : 'false');
-      });
+      markActiveView(viewGroup, view.dataset.file);
       showCompetition(viewRoot, viewGroup.querySelector('.schaken-standen__content'), view.dataset.file, view.dataset.compact === 'true');
       return;
     }
@@ -192,7 +206,11 @@
       var linkUrl = new URL(link.href, window.location.href);
       if (linkRoot && linkRoot.dataset.mode === 'inline' && linkUrl.origin === window.location.origin && linkUrl.searchParams.has('schaken_standen_file')) {
         event.preventDefault();
-        loadInline(link.closest('.schaken-standen__content'), linkUrl.toString(), true);
+        var linkContent = link.closest('.schaken-standen__content');
+        // The detail page has its own table shape; keeping the cross table's
+        // compact columns would squeeze it.
+        linkContent.classList.remove('is-compact-view');
+        loadInline(linkContent, linkUrl.toString(), true);
       }
       return;
     }
