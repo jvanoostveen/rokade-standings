@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rokade Standen
  * Description: Indexeert Rokade-standenbestanden op disk en toont ze als toegankelijke, gestylede WordPress-tabs.
- * Version: 0.1.5
+ * Version: 0.1.6
  * Requires at least: 6.5
  * Tested up to: 7.0
  * Requires PHP: 7.4
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('SCHAKEN_STANDEN_VERSION', '0.1.5');
+define('SCHAKEN_STANDEN_VERSION', '0.1.6');
 define('SCHAKEN_STANDEN_FILE', __FILE__);
 define('SCHAKEN_STANDEN_DIR', plugin_dir_path(__FILE__));
 define('SCHAKEN_STANDEN_URL', plugin_dir_url(__FILE__));
