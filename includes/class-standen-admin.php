@@ -1,0 +1,85 @@
+<?php
+
+if (!defined('ABSPATH')) {
+	exit;
+}
+
+class Schaken_Standen_Admin {
+	public static function register() {
+		add_action('admin_menu', array(__CLASS__, 'menu'));
+		add_action('admin_init', array(__CLASS__, 'settings'));
+		add_action('admin_post_schaken_standen_refresh', array(__CLASS__, 'refresh'));
+		add_action('update_option_schaken_standen_settings', function () {
+			(new Schaken_Standen_Index())->clear();
+		});
+	}
+
+	public static function menu() {
+		add_options_page(__('Schaken standen', 'schaken-standen'), __('Schaken standen', 'schaken-standen'), 'manage_options', 'schaken-standen', array(__CLASS__, 'page'));
+	}
+
+	public static function settings() {
+		register_setting('schaken_standen', 'schaken_standen_settings', array('sanitize_callback' => array(__CLASS__, 'sanitize')));
+		add_settings_section('schaken_standen_source', __('Bron en cache', 'schaken-standen'), function () {
+			echo '<p>' . esc_html__('Het bronpad is de map waar de seizoensmappen (bijvoorbeeld 2026-2027) in staan.', 'schaken-standen') . '</p>';
+		}, 'schaken-standen');
+		add_settings_field('source_path', __('Bronpad op de server', 'schaken-standen'), array(__CLASS__, 'source_path_field'), 'schaken-standen', 'schaken_standen_source');
+		add_settings_field('cache_minutes', __('Cacheduur (minuten)', 'schaken-standen'), array(__CLASS__, 'cache_field'), 'schaken-standen', 'schaken_standen_source');
+	}
+
+	public static function sanitize($input) {
+		return array(
+			'source_path' => untrailingslashit(sanitize_text_field($input['source_path'] ?? '')),
+			'cache_minutes' => min(1440, max(1, absint($input['cache_minutes'] ?? 15))),
+		);
+	}
+
+	public static function source_path_field() {
+		$settings = (new Schaken_Standen_Index())->settings();
+		printf('<input type="text" class="regular-text code" name="schaken_standen_settings[source_path]" value="%s" placeholder="/var/www/html/wp-content/uploads/standen">', esc_attr($settings['source_path']));
+	}
+
+	public static function cache_field() {
+		$settings = (new Schaken_Standen_Index())->settings();
+		printf('<input type="number" min="1" max="1440" name="schaken_standen_settings[cache_minutes]" value="%d">', absint($settings['cache_minutes']));
+	}
+
+	public static function refresh() {
+		check_admin_referer('schaken_standen_refresh');
+		if (!current_user_can('manage_options')) {
+			wp_die(esc_html__('Geen toegang.', 'schaken-standen'));
+		}
+		$index = new Schaken_Standen_Index();
+		$index->clear();
+		$index->refresh();
+		wp_safe_redirect(add_query_arg('schaken_standen_refreshed', '1', admin_url('options-general.php?page=schaken-standen')));
+		exit;
+	}
+
+	public static function page() {
+		if (!current_user_can('manage_options')) {
+			return;
+		}
+		$index = (new Schaken_Standen_Index())->get_index();
+		?>
+		<div class="wrap">
+			<h1><?php esc_html_e('Schaken standen', 'schaken-standen'); ?></h1>
+			<?php if (isset($_GET['schaken_standen_refreshed'])) : ?><div class="notice notice-success is-dismissible"><p><?php esc_html_e('Index vernieuwd.', 'schaken-standen'); ?></p></div><?php endif; ?>
+			<form action="options.php" method="post">
+				<?php settings_fields('schaken_standen'); do_settings_sections('schaken-standen'); submit_button(); ?>
+			</form>
+			<hr>
+			<h2><?php esc_html_e('Index verversen', 'schaken-standen'); ?></h2>
+			<p><?php echo esc_html(sprintf(_n('%d seizoen gevonden.', '%d seizoenen gevonden.', count($index['seasons']), 'schaken-standen'), count($index['seasons']))); ?></p>
+			<form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+				<input type="hidden" name="action" value="schaken_standen_refresh">
+				<?php wp_nonce_field('schaken_standen_refresh'); submit_button(__('Nu opnieuw indexeren', 'schaken-standen'), 'secondary', 'submit', false); ?>
+			</form>
+			<hr>
+			<h2><?php esc_html_e('Shortcode', 'schaken-standen'); ?></h2>
+			<p><code>[schaken_standen seizoen="2026-2027"]</code></p>
+			<p><?php esc_html_e('Optioneel: categorie="interne-competitie", categorie="doorgeefschaak" of categorie="snelschaken". Gebruik modus="iframe" voor de oorspronkelijke Rokade-weergave.', 'schaken-standen'); ?></p>
+		</div>
+		<?php
+	}
+}

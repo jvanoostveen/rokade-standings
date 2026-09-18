@@ -1,0 +1,6 @@
+# macOS metadata
+.DS_Store
+
+# Lokale Rokade-exporten kunnen persoonsgegevens en databasebestanden bevatten.
+# Plaats ze lokaal in deze map voor Docker; ze worden nooit gecommit.
+/docs/current/standen/
