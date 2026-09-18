@@ -5,12 +5,21 @@ if (!defined('ABSPATH')) {
 }
 
 class Schaken_Standen_Admin {
+	private static $index = null;
+
+	private static function index() {
+		if (null === self::$index) {
+			self::$index = new Schaken_Standen_Index();
+		}
+		return self::$index;
+	}
+
 	public static function register() {
 		add_action('admin_menu', array(__CLASS__, 'menu'));
 		add_action('admin_init', array(__CLASS__, 'settings'));
 		add_action('admin_post_schaken_standen_refresh', array(__CLASS__, 'refresh'));
 		add_action('update_option_schaken_standen_settings', function () {
-			(new Schaken_Standen_Index())->clear();
+			self::index()->clear();
 			// The cron recurrence is derived from the cache duration, so it has to
 			// be re-registered whenever that duration changes.
 			schaken_standen_schedule_refresh();
@@ -39,6 +48,10 @@ class Schaken_Standen_Admin {
 	}
 
 	public static function sanitize($input) {
+		if (!is_array($input)) {
+			$input = array();
+		}
+
 		return array(
 			'source_path' => untrailingslashit(sanitize_text_field($input['source_path'] ?? '')),
 			'cache_minutes' => min(1440, max(1, absint($input['cache_minutes'] ?? 15))),
@@ -48,23 +61,24 @@ class Schaken_Standen_Admin {
 	}
 
 	public static function source_path_field() {
-		$settings = (new Schaken_Standen_Index())->settings();
+		$settings = self::index()->settings();
 		printf('<input type="text" class="regular-text code" name="schaken_standen_settings[source_path]" value="%s" placeholder="/var/www/html/wp-content/uploads/standen">', esc_attr($settings['source_path']));
+		echo '<p class="description">' . esc_html__('Let op: elk .htm- of .html-bestand onder dit pad wordt zonder inloggen openbaar leesbaar via de site. Wijs dus precies de standenmap aan en niets erboven.', 'schaken-standen') . '</p>';
 	}
 
 	public static function cache_field() {
-		$settings = (new Schaken_Standen_Index())->settings();
+		$settings = self::index()->settings();
 		printf('<input type="number" min="1" max="1440" name="schaken_standen_settings[cache_minutes]" value="%d">', absint($settings['cache_minutes']));
 	}
 
 	public static function internal_group_order_field() {
-		$settings = (new Schaken_Standen_Index())->settings();
+		$settings = self::index()->settings();
 		printf('<textarea class="large-text code" rows="9" name="schaken_standen_settings[internal_group_order]">%s</textarea>', esc_textarea($settings['internal_group_order']));
 		echo '<p class="description">' . esc_html__('Eén groep per regel. Deze tekst wordt ook de knopnaam. De plugin negeert automatisch “groep” in de bestandsnaam; “Starters” herkent dus bijvoorbeeld “Startersgroep Voorjaar 2026”. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
 	}
 
 	public static function block_button_templates_field() {
-		$settings = (new Schaken_Standen_Index())->settings();
+		$settings = self::index()->settings();
 		printf('<textarea class="large-text code" rows="3" name="schaken_standen_settings[block_button_templates]">%s</textarea>', esc_textarea($settings['block_button_templates']));
 		echo '<p class="description">' . esc_html__('Eén regel per categorie, in de vorm “categorie | knopnaam”. Gebruik {nummer} voor het bloknummer uit de titel, bijvoorbeeld “snelschaken | Blok {nummer}”.', 'schaken-standen') . '</p>';
 	}
@@ -74,7 +88,7 @@ class Schaken_Standen_Admin {
 		if (!current_user_can('manage_options')) {
 			wp_die(esc_html__('Geen toegang.', 'schaken-standen'));
 		}
-		$index = new Schaken_Standen_Index();
+		$index = self::index();
 		$index->clear();
 		$index->refresh();
 		wp_safe_redirect(add_query_arg('schaken_standen_refreshed', '1', admin_url('options-general.php?page=schaken-standen')));
@@ -85,7 +99,7 @@ class Schaken_Standen_Admin {
 		if (!current_user_can('manage_options')) {
 			return;
 		}
-		$index = (new Schaken_Standen_Index())->get_index();
+		$index = self::index()->get_index();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e('Rokade Standen', 'schaken-standen'); ?></h1>
