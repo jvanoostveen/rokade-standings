@@ -1,6 +1,7 @@
 (function (blocks, blockEditor, components, element, i18n, serverSideRender) {
   var el = element.createElement;
   var InspectorControls = blockEditor.InspectorControls;
+  var useBlockProps = blockEditor.useBlockProps;
   var PanelBody = components.PanelBody;
   var SelectControl = components.SelectControl;
   var ServerSideRender = serverSideRender;
@@ -33,8 +34,35 @@
   blocks.registerBlockType('schaken-standen/rokade', {
     edit: function (props) {
       var attributes = props.attributes;
+      var previewRef = element.useRef(null);
       var validCategories = categoryOptions(attributes.seizoen).map(function (option) { return option.value; });
       var category = validCategories.indexOf(attributes.categorie) === -1 ? '' : attributes.categorie;
+      var blockProps = useBlockProps({
+        className: 'schaken-standen-block-preview',
+        ref: previewRef
+      });
+
+      element.useEffect(function () {
+        var preview = previewRef.current;
+        if (!preview) return;
+
+        var disablePreviewControls = function () {
+          preview.querySelectorAll('.schaken-standen').forEach(function (standings) {
+            standings.setAttribute('inert', '');
+            standings.setAttribute('aria-hidden', 'true');
+          });
+          preview.querySelectorAll('a, button, [role="tab"], iframe, input, select, textarea').forEach(function (item) {
+            item.setAttribute('tabindex', '-1');
+          });
+        };
+        disablePreviewControls();
+
+        var Observer = preview.ownerDocument.defaultView.MutationObserver;
+        if (!Observer) return;
+        var observer = new Observer(disablePreviewControls);
+        observer.observe(preview, { childList: true, subtree: true });
+        return function () { observer.disconnect(); };
+      }, [attributes.seizoen, attributes.categorie, attributes.modus]);
 
       return el(element.Fragment, {},
         el(InspectorControls, {},
@@ -68,19 +96,7 @@
             })
           )
         ),
-        el('div', {
-          className: 'schaken-standen-block-preview',
-          onClickCapture: function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-          },
-          onKeyDownCapture: function (event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-          }
-        },
+        el('div', blockProps,
           el(ServerSideRender, { block: 'schaken-standen/rokade', attributes: attributes })
         )
       );

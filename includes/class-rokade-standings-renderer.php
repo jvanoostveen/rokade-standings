@@ -116,7 +116,7 @@ class Schaken_Standen_Renderer {
 
 		wp_enqueue_style('schaken-standen');
 		wp_enqueue_script('schaken-standen');
-		return $this->render($season, $competitions, 'iframe' === $attributes['modus']);
+		return $this->render($season, $competitions, 'iframe' === $attributes['modus'], empty($attributes['categorie']));
 	}
 
 	private function choose_season($seasons, $requested) {
@@ -127,7 +127,7 @@ class Schaken_Standen_Renderer {
 		return $available ? end($available) : '';
 	}
 
-	private function render($season, $competitions, $iframe) {
+	private function render($season, $competitions, $iframe, $show_categories = true) {
 		$categories = array();
 		foreach ($competitions as $competition) {
 			if ('interne-competitie' !== $competition['category']) {
@@ -146,11 +146,13 @@ class Schaken_Standen_Renderer {
 		ob_start();
 		?>
 		<section class="schaken-standen" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-season="<?php echo esc_attr($season); ?>">
-			<nav class="schaken-standen__categories" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
-				<?php foreach ($categories as $key => $category) : ?>
-					<button type="button" class="schaken-standen__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>"><?php echo esc_html($category['label']); ?></button>
-				<?php endforeach; ?>
-			</nav>
+			<?php if ($show_categories) : ?>
+				<nav class="schaken-standen__categories" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
+					<?php foreach ($categories as $key => $category) : ?>
+						<button type="button" class="schaken-standen__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>"><?php echo esc_html($category['label']); ?></button>
+					<?php endforeach; ?>
+				</nav>
+			<?php endif; ?>
 			<?php foreach ($categories as $key => $category) : ?>
 				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category-panel="<?php echo esc_attr($key); ?>">
 					<?php $tab_number = 0; ?>
