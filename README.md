@@ -46,6 +46,16 @@ De waarde van `seizoen` moet exact de naam van een geïndexeerde submap zijn, bi
 
 Stop de lokale omgeving desgewenst weer met `docker compose down`. De database en WordPress-installatie blijven dan in de Docker-volumes bewaard.
 
+## Productiepakket maken
+
+Maak een ZIP-bestand dat rechtstreeks via **Plugins → Nieuwe plugin toevoegen → Plugin uploaden** in WordPress kan worden geïnstalleerd met:
+
+```sh
+npm run package
+```
+
+Het pakket verschijnt als `dist/rokade-standings-<versie>.zip`. Het bevat alleen de plugincode, assets en README; lokale exportbestanden, thema's, Docker-bestanden en ontwikkelbestanden blijven buiten het archief.
+
 ## Productiebron
 
 Kopieer de exportmap naar een leesbare locatie buiten de plugin, bijvoorbeeld:

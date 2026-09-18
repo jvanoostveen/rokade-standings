@@ -1,0 +1,7 @@
+{
+  "name": "rokade-standings",
+  "private": true,
+  "scripts": {
+    "package": "bash scripts/package.sh"
+  }
+}
