@@ -11,7 +11,7 @@ services:
       WORDPRESS_DEBUG: "0"
     volumes:
       - wordpress_data:/var/www/html
-      - ./:/var/www/html/wp-content/plugins/standen-op-disk
+      - ./:/var/www/html/wp-content/plugins/rokade-standings
       - ./docs/current/standen:/standen:ro
       - ./themes:/var/www/html/wp-content/themes:ro
     depends_on:

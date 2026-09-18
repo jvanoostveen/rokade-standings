@@ -50,4 +50,4 @@ Kopieer de exportmap naar een leesbare locatie buiten de plugin, bijvoorbeeld:
 wp-content/uploads/standen/2026-2027/kroon/C1Index.htm
 ```
 
-Vul dan de absolute locatie van de map `standen` in. De plugin accepteert alleen seizoensmappen met naam `JJJJ-JJJJ` en valideert ieder verzoek tegen dat bronpad, zodat een URL nooit andere serverbestanden kan uitlezen.
+Vul dan de absolute locatie van de map `standen` in. De plugin accepteert alleen seizoensmappen die door de index zijn gevonden en valideert ieder verzoek tegen dat bronpad, zodat een URL nooit andere serverbestanden kan uitlezen.

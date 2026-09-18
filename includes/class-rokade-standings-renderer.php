@@ -18,8 +18,8 @@ class Schaken_Standen_Renderer {
 	}
 
 	public function register_assets() {
-		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/standen.css', array(), SCHAKEN_STANDEN_VERSION);
-		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/standen.js', array(), SCHAKEN_STANDEN_VERSION, true);
+		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), SCHAKEN_STANDEN_VERSION);
+		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), SCHAKEN_STANDEN_VERSION, true);
 	}
 
 	public function shortcode($attributes) {

@@ -20,9 +20,9 @@ define('SCHAKEN_STANDEN_FILE', __FILE__);
 define('SCHAKEN_STANDEN_DIR', plugin_dir_path(__FILE__));
 define('SCHAKEN_STANDEN_URL', plugin_dir_url(__FILE__));
 
-require_once SCHAKEN_STANDEN_DIR . 'includes/class-standen-index.php';
-require_once SCHAKEN_STANDEN_DIR . 'includes/class-standen-renderer.php';
-require_once SCHAKEN_STANDEN_DIR . 'includes/class-standen-admin.php';
+require_once SCHAKEN_STANDEN_DIR . 'includes/class-rokade-standings-index.php';
+require_once SCHAKEN_STANDEN_DIR . 'includes/class-rokade-standings-renderer.php';
+require_once SCHAKEN_STANDEN_DIR . 'includes/class-rokade-standings-admin.php';
 
 function schaken_standen() {
 	static $plugin = null;
