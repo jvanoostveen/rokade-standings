@@ -127,7 +127,7 @@ class Schaken_Standen_Renderer {
 					'items' => array(),
 				);
 			}
-			$item['display_title'] = $this->internal_display_title($item['title'], $period['label']);
+			$item['display_title'] = $this->internal_display_title($item['title']);
 			$periods[$period['key']]['items'][] = $item;
 		}
 
@@ -178,10 +178,10 @@ class Schaken_Standen_Renderer {
 		return $rules;
 	}
 
-	private function internal_display_title($title, $period_label) {
+	private function internal_display_title($title) {
 		foreach ($this->internal_group_rules() as $rule) {
 			if (false !== strpos(strtolower(remove_accents($title)), $rule['needle']) && '' !== $rule['label']) {
-				return trim($rule['label'] . ' ' . $period_label);
+				return $rule['label'];
 			}
 		}
 		return $title;

@@ -52,7 +52,7 @@ class Schaken_Standen_Admin {
 	public static function internal_group_order_field() {
 		$settings = (new Schaken_Standen_Index())->settings();
 		printf('<textarea class="large-text code" rows="9" name="schaken_standen_settings[internal_group_order]">%s</textarea>', esc_textarea($settings['internal_group_order']));
-		echo '<p class="description">' . esc_html__('Eén regel per groep, van boven naar beneden. Gebruik “zoektekst | knopnaam”; de knopnaam is optioneel. De periode uit de titel wordt automatisch achter de knopnaam gezet. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
+			echo '<p class="description">' . esc_html__('Eén regel per groep, van boven naar beneden. Gebruik “zoektekst | knopnaam”; de knopnaam is optioneel. De periode wordt als kop boven de knoppen getoond. Niet-herkende groepen blijven zichtbaar na deze lijst.', 'schaken-standen') . '</p>';
 	}
 
 	public static function refresh() {
