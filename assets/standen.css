@@ -1,8 +1,8 @@
 .schaken-standen { --schaken-accent: var(--wp--preset--color--contrast, #1d5e32); margin-block: 1.5rem; }
 .schaken-standen button { font: inherit; cursor: pointer; }
-.schaken-standen__categories, .schaken-standen__tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
-.schaken-standen__category, .schaken-standen__tab { border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .55rem .8rem; }
-.schaken-standen__category.is-active, .schaken-standen__tab.is-active { background: var(--schaken-accent); border-color: var(--schaken-accent); color: #fff; }
+.schaken-standen__categories, .schaken-standen__tabs, .schaken-standen__views { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.schaken-standen__category, .schaken-standen__tab, .schaken-standen__view { border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .55rem .8rem; }
+.schaken-standen__category.is-active, .schaken-standen__tab.is-active, .schaken-standen__view.is-active { background: var(--schaken-accent); border-color: var(--schaken-accent); color: #fff; }
 .schaken-standen__group { display: none; }
 .schaken-standen__group.is-active { display: block; }
 .schaken-standen__content[aria-busy="true"] { min-height: 5rem; opacity: .55; }

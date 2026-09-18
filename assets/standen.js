@@ -28,6 +28,26 @@
     }
   }
 
+  function updateViews(group, tab, activeFile) {
+    var views = group.querySelector('.schaken-standen__views');
+    if (!views) return;
+    var options = [
+      { label: 'Ranglijst', file: tab.dataset.file },
+      { label: 'Kruistabel', file: tab.dataset.crossFile },
+      { label: 'Scoretabel', file: tab.dataset.scoreFile }
+    ];
+    views.textContent = '';
+    options.forEach(function (option) {
+      if (!option.file) return;
+      var view = document.createElement('button');
+      view.type = 'button';
+      view.className = 'schaken-standen__view' + (option.file === activeFile ? ' is-active' : '');
+      view.dataset.file = option.file;
+      view.textContent = option.label;
+      views.appendChild(view);
+    });
+  }
+
   document.addEventListener('click', function (event) {
     var back = event.target.closest('.schaken-standen__back');
     if (back) {
@@ -35,6 +55,15 @@
       var activeTab = backRoot.querySelector('.schaken-standen__group.is-active .schaken-standen__tab.is-active');
       if (!activeTab) return;
       showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file);
+      return;
+    }
+
+    var view = event.target.closest('.schaken-standen__view');
+    if (view) {
+      var viewGroup = view.closest('.schaken-standen__group');
+      var viewRoot = view.closest('.schaken-standen');
+      viewGroup.querySelectorAll('.schaken-standen__view').forEach(function (item) { item.classList.toggle('is-active', item === view); });
+      showCompetition(viewRoot, viewGroup.querySelector('.schaken-standen__content'), view.dataset.file);
       return;
     }
 
@@ -65,6 +94,7 @@
         item.classList.toggle('is-active', active);
         item.setAttribute('aria-selected', active ? 'true' : 'false');
       });
+      updateViews(group, firstTab, firstTab.dataset.file);
       showCompetition(root, group.querySelector('.schaken-standen__content'), firstTab.dataset.file);
       return;
     }
@@ -74,6 +104,7 @@
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-selected', active ? 'true' : 'false');
     });
+    updateViews(button.closest('.schaken-standen__group'), button, button.dataset.file);
     var content = button.closest('.schaken-standen__group').querySelector('.schaken-standen__content');
     showCompetition(root, content, button.dataset.file);
   });

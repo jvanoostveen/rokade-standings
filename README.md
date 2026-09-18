@@ -32,6 +32,8 @@ Handige varianten:
 
 Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig ingelezen en krijgt de lettertypes, kleuren en links van het WordPress-thema mee. Interne naam- en detail-links wisselen alleen dit inhoudsvak en tonen een knop om terug te keren naar de ranglijst. De knoppen blijven altijd WordPress-native. Met `modus="iframe"` wordt de oorspronkelijke HTML via een beveiligde plugin-proxy getoond; dat is nuttig wanneer de originele Rokade-layout belangrijker is.
 
+Wanneer de export ze bevat, verschijnen bij iedere groep ook de knoppen **Kruistabel** en **Scoretabel**. Deze laden eveneens in-place.
+
 De waarde van `seizoen` moet exact de naam van een geïndexeerde submap zijn, bijvoorbeeld `2026-2027`, `voorjaar-2026` of `archief`. Een afwijkende waarde toont geen standen en kan nooit naar bestanden buiten de ingestelde standenmap verwijzen.
 
 ## Lokale thema's

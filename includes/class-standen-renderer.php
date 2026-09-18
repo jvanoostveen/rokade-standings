@@ -82,8 +82,13 @@ class Schaken_Standen_Renderer {
 				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category-panel="<?php echo esc_attr($key); ?>">
 					<div class="schaken-standen__tabs" role="tablist" aria-label="<?php echo esc_attr($category['label']); ?>">
 						<?php foreach ($category['items'] as $position => $competition) : ?>
-							<button type="button" role="tab" class="schaken-standen__tab<?php echo 0 === $position ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" aria-selected="<?php echo 0 === $position ? 'true' : 'false'; ?>"><?php echo esc_html($competition['title']); ?></button>
+							<button type="button" role="tab" class="schaken-standen__tab<?php echo 0 === $position ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-selected="<?php echo 0 === $position ? 'true' : 'false'; ?>"><?php echo esc_html($competition['title']); ?></button>
 						<?php endforeach; ?>
+					</div>
+					<div class="schaken-standen__views">
+						<?php if ($key === $first_category) : ?>
+							<?php echo $this->render_view_buttons($first_item); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php endif; ?>
 					</div>
 					<div class="schaken-standen__content" aria-live="polite">
 						<?php if ($key === $first_category) : ?>
@@ -95,6 +100,22 @@ class Schaken_Standen_Renderer {
 		</section>
 		<?php
 		return ob_get_clean();
+	}
+
+	private function render_view_buttons($competition) {
+		$views = array(
+			array('label' => __('Ranglijst', 'schaken-standen'), 'file' => $competition['ranking_file']),
+			array('label' => __('Kruistabel', 'schaken-standen'), 'file' => $competition['cross_file']),
+			array('label' => __('Scoretabel', 'schaken-standen'), 'file' => $competition['score_file']),
+		);
+		$output = '';
+		foreach ($views as $view) {
+			if (!$view['file']) {
+				continue;
+			}
+			$output .= '<button type="button" class="schaken-standen__view' . ($view['file'] === $competition['ranking_file'] ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '">' . esc_html($view['label']) . '</button>';
+		}
+		return $output;
 	}
 
 	private function render_file($season, $relative_file, $iframe) {

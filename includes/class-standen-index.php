@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 
 /** Reads the small Index.htm files once and caches their metadata in a transient. */
 class Schaken_Standen_Index {
-	const CACHE_KEY = 'schaken_standen_index_v1';
+	const CACHE_KEY = 'schaken_standen_index_v2';
 
 	public function settings() {
 		$settings = get_option('schaken_standen_settings', array());
@@ -90,6 +90,8 @@ class Schaken_Standen_Index {
 		$prefix = isset($matches[1]) ? (int) $matches[1] : 9999;
 		$ranking = preg_replace('/Index\.htm$/i', 'Ranglijst.htm', $filename);
 		$ranking_relative = $directory . '/' . $ranking;
+		$cross_table = preg_replace('/Index\.htm$/i', 'Kruistabel.htm', $filename);
+		$score_table = preg_replace('/Index\.htm$/i', 'Scoretabel.htm', $filename);
 
 		return array(
 			'id' => sanitize_title($season . '-' . $directory . '-' . $filename),
@@ -98,6 +100,8 @@ class Schaken_Standen_Index {
 			'category_label' => $this->category_label($this->category_for($title)),
 			'file' => str_replace(DIRECTORY_SEPARATOR, '/', $relative_in_season),
 			'ranking_file' => str_replace(DIRECTORY_SEPARATOR, '/', $ranking_relative),
+			'cross_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $cross_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $directory . '/' . $cross_table) : '',
+			'score_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $score_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $directory . '/' . $score_table) : '',
 			'number' => $prefix,
 		);
 	}
