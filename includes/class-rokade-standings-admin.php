@@ -11,6 +11,9 @@ class Schaken_Standen_Admin {
 		add_action('admin_post_schaken_standen_refresh', array(__CLASS__, 'refresh'));
 		add_action('update_option_schaken_standen_settings', function () {
 			(new Schaken_Standen_Index())->clear();
+			// The cron recurrence is derived from the cache duration, so it has to
+			// be re-registered whenever that duration changes.
+			schaken_standen_schedule_refresh();
 		});
 	}
 

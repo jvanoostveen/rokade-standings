@@ -44,11 +44,28 @@ function schaken_standen_activate() {
 		));
 	}
 
-	if (!wp_next_scheduled('schaken_standen_refresh_index')) {
-		wp_schedule_event(time() + 300, 'hourly', 'schaken_standen_refresh_index');
-	}
+	schaken_standen_schedule_refresh();
 }
 register_activation_hook(__FILE__, 'schaken_standen_activate');
+
+/**
+ * The cron only exists to warm the transient before it expires, so running it
+ * hourly against a fifteen-minute cache left visitors paying for the refresh.
+ * Give it a recurrence that tracks the configured cache duration instead.
+ */
+add_filter('cron_schedules', function ($schedules) {
+	$minutes = (new Schaken_Standen_Index())->cache_minutes();
+	$schedules['schaken_standen_cache'] = array(
+		'interval' => MINUTE_IN_SECONDS * $minutes,
+		'display' => __('Rokade Standen cacheduur', 'schaken-standen'),
+	);
+	return $schedules;
+});
+
+function schaken_standen_schedule_refresh() {
+	wp_clear_scheduled_hook('schaken_standen_refresh_index');
+	wp_schedule_event(time() + MINUTE_IN_SECONDS, 'schaken_standen_cache', 'schaken_standen_refresh_index');
+}
 
 function schaken_standen_deactivate() {
 	wp_clear_scheduled_hook('schaken_standen_refresh_index');

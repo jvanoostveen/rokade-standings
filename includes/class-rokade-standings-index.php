@@ -39,6 +39,9 @@ class Schaken_Standen_Index {
 		$index = array('seasons' => array(), 'updated_at' => time());
 
 		if (!$root || !is_dir($root) || !is_readable($root)) {
+			// Cache the miss too, otherwise every page view stats an unreachable
+			// (possibly networked) path again.
+			$this->store($index);
 			return $index;
 		}
 
@@ -69,13 +72,20 @@ class Schaken_Standen_Index {
 		}
 
 		uksort($index['seasons'], 'version_compare');
-		$minutes = max(1, absint($this->settings()['cache_minutes']));
-		set_transient(self::CACHE_KEY, $index, MINUTE_IN_SECONDS * $minutes);
+		$this->store($index);
 		return $index;
+	}
+
+	public function cache_minutes() {
+		return min(1440, max(1, absint($this->settings()['cache_minutes'])));
 	}
 
 	public function clear() {
 		delete_transient(self::CACHE_KEY);
+	}
+
+	private function store($index) {
+		set_transient(self::CACHE_KEY, $index, MINUTE_IN_SECONDS * $this->cache_minutes());
 	}
 
 	private function make_competition($root, $season, $file) {
@@ -91,9 +101,15 @@ class Schaken_Standen_Index {
 		preg_match('/^C(\d+)Index\.htm$/i', $filename, $matches);
 		$prefix = isset($matches[1]) ? (int) $matches[1] : 9999;
 		$ranking = preg_replace('/Index\.htm$/i', 'Ranglijst.htm', $filename);
-		$ranking_relative = $directory . '/' . $ranking;
 		$cross_table = preg_replace('/Index\.htm$/i', 'Kruistabel.htm', $filename);
 		$score_table = preg_replace('/Index\.htm$/i', 'Scoretabel.htm', $filename);
+
+		// The ranking is what the first render shows, so a competition without a
+		// readable one would only ever produce an error notice. Skip it.
+		if (!is_readable(dirname($file) . DIRECTORY_SEPARATOR . $ranking)) {
+			return null;
+		}
+		$ranking_relative = $directory . '/' . $ranking;
 
 		return array(
 			'id' => sanitize_title($season . '-' . $directory . '-' . $filename),
