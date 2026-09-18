@@ -101,13 +101,13 @@ class Schaken_Standen_Admin {
 	}
 
 	public static function refresh() {
-		check_admin_referer('schaken_standen_refresh');
 		if (!current_user_can('manage_options')) {
 			wp_die(esc_html__('Geen toegang.', 'schaken-standen'));
 		}
-		$index = self::index();
-		$index->clear();
-		$index->refresh();
+		check_admin_referer('schaken_standen_refresh');
+		// refresh() rescans and overwrites the transient, so clearing it first
+		// only widens the window in which a visitor pays for the rescan.
+		self::index()->refresh();
 		wp_safe_redirect(add_query_arg('schaken_standen_refreshed', '1', admin_url('options-general.php?page=schaken-standen')));
 		exit;
 	}

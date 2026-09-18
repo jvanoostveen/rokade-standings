@@ -79,12 +79,10 @@ class Schaken_Standen_Index {
 		return $ids ? $ids[0] : '';
 	}
 
-	public function get_index($force = false) {
-		if (!$force) {
-			$cached = get_transient(self::CACHE_KEY);
-			if (is_array($cached) && isset($cached['sources'])) {
-				return $cached;
-			}
+	public function get_index() {
+		$cached = get_transient(self::CACHE_KEY);
+		if (is_array($cached) && isset($cached['sources'])) {
+			return $cached;
 		}
 
 		return $this->refresh();
@@ -185,12 +183,12 @@ class Schaken_Standen_Index {
 		}
 		$ranking_relative = $in_directory . $ranking;
 
+		$category = $this->category_for($title);
+
 		return array(
-			'id' => sanitize_title($season . '-' . $directory . '-' . $filename),
 			'title' => $title,
-			'category' => $this->category_for($title),
-			'category_label' => $this->category_label($this->category_for($title)),
-			'file' => str_replace(DIRECTORY_SEPARATOR, '/', $relative_in_season),
+			'category' => $category,
+			'category_label' => $this->category_label($category),
 			'ranking_file' => str_replace(DIRECTORY_SEPARATOR, '/', $ranking_relative),
 			'cross_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $cross_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $in_directory . $cross_table) : '',
 			'score_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $score_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $in_directory . $score_table) : '',

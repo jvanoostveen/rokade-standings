@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) {
 class Schaken_Standen_Renderer {
 	private $index;
 	private $group_rules = null;
+	private $block_button_rules = null;
 
 	public function __construct($index) {
 		$this->index = $index;
@@ -247,20 +248,40 @@ class Schaken_Standen_Renderer {
 		return $candidate;
 	}
 
+	/** Category => button template, resolved once per render instead of per competition. */
+	private function block_button_rules() {
+		if (null !== $this->block_button_rules) {
+			return $this->block_button_rules;
+		}
+
+		$settings = $this->index->settings();
+		$lines = preg_split('/\\r\\n|\\r|\\n/', (string) $settings['block_button_templates']);
+		$rules = array();
+		foreach ($lines as $line) {
+			$parts = array_map('trim', explode('|', $line, 2));
+			if (2 !== count($parts) || '' === $parts[1]) {
+				continue;
+			}
+			// First line wins, as it did when this was a linear search.
+			$key = sanitize_title($parts[0]);
+			if (!isset($rules[$key])) {
+				$rules[$key] = $parts[1];
+			}
+		}
+		$this->block_button_rules = $rules;
+		return $this->block_button_rules;
+	}
+
 	private function category_display_title($category, $title) {
 		if (!in_array($category, array('doorgeefschaak', 'snelschaken'), true) || !preg_match('/\\bblok\\s+(\\d+)\\b/ui', $title, $matches)) {
 			return $title;
 		}
 
-		$settings = $this->index->settings();
-		$lines = preg_split('/\\r\\n|\\r|\\n/', (string) $settings['block_button_templates']);
-		foreach ($lines as $line) {
-			$parts = array_map('trim', explode('|', $line, 2));
-			if (2 === count($parts) && sanitize_title($parts[0]) === $category && '' !== $parts[1]) {
-				return str_replace('{nummer}', (string) ((int) $matches[1]), $parts[1]);
-			}
+		$rules = $this->block_button_rules();
+		if (!isset($rules[$category])) {
+			return $title;
 		}
-		return $title;
+		return str_replace('{nummer}', (string) ((int) $matches[1]), $rules[$category]);
 	}
 
 	private function periods_for_category($season, $category, $items) {
