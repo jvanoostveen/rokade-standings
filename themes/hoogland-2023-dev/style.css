@@ -1,0 +1,50 @@
+/*
+Theme Name: Hoogland 2023 (Dev)
+Theme URI: schakeninhoogland.nl
+Author: Joeri van Oostveen
+Description: Custom theme for Schaakvereniging Hoogland in 2023
+Template: hoogland
+Version: 2023.9
+*/
+
+/* Menu */
+header .menu-hoofdmenu-container ul li {
+  padding: 10px;
+  border-radius: 4px;
+}
+
+header .menu-hoofdmenu-container ul li:hover {
+  background-color: #ccc;
+}
+
+header .menu-hoofdmenu-container ul li:hover a {
+  text-decoration: none;
+}
+
+header .menu-hoofdmenu-container ul li ul {
+  margin-left: -10px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+header .menu-hoofdmenu-container ul li ul li {
+  padding: 0;
+}
+
+header .menu-hoofdmenu-container ul li ul li:last-child {
+  border-bottom: none;
+}
+
+header .menu-hoofdmenu-container ul li ul li a {
+  display: inline-block;
+  padding: 10px 15px;
+}
+
+/* Widgets (not working) */
+.em.pixelbones ul li ul {
+  margin-top: 0 !important;
+}
+
+.em.pixelbones ul li ul li {
+  margin-bottom: 0 !important;
+}

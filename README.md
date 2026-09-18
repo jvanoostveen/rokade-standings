@@ -36,7 +36,7 @@ De waarde van `seizoen` moet exact de naam van een geïndexeerde submap zijn, bi
 
 ## Lokale thema's
 
-`docs/themes/` wordt read-only gemount naar `wp-content/themes/`. De lokale testinstallatie gebruikt `hoogland-2023-dev` als child theme; de vereiste parent `hoogland` staat in dezelfde map.
+`themes/` wordt read-only gemount naar `wp-content/themes/`. De lokale testinstallatie gebruikt `hoogland-2023-dev` als child theme; de vereiste parent `hoogland` staat in dezelfde map. De thema's worden meegecommit, zodat een clone zonder extra lokale kopie direct kan draaien.
 
 Stop de lokale omgeving desgewenst weer met `docker compose down`. De database en WordPress-installatie blijven dan in de Docker-volumes bewaard.
 
