@@ -129,10 +129,13 @@ class Schaken_Standen_Index {
 		foreach ($season_dirs as $season_path) {
 			$season = basename($season_path);
 			$competitions = array();
-			$files = glob($season_path . '/*/C*Index.htm');
-			if (!$files) {
-				$files = array();
-			}
+			// Exports are not consistent about this: some seasons keep every
+			// competition in its own subdirectory, others drop the files straight
+			// into the season folder. Both layouts hold the same kind of standing.
+			$files = array_merge(
+				glob($season_path . '/*/C*Index.htm') ?: array(),
+				glob($season_path . '/C*Index.htm') ?: array()
+			);
 
 			foreach ($files as $file) {
 				$item = $this->make_competition($root, $season, $file);
@@ -163,7 +166,11 @@ class Schaken_Standen_Index {
 
 		$relative = ltrim(substr($file, strlen($root)), DIRECTORY_SEPARATOR);
 		$relative_in_season = ltrim(substr($relative, strlen($season)), DIRECTORY_SEPARATOR);
+		// dirname() answers '.' for a file that sits in the season folder itself;
+		// an empty directory keeps the stored paths free of a './' prefix.
 		$directory = dirname($relative_in_season);
+		$directory = '.' === $directory ? '' : $directory;
+		$in_directory = '' === $directory ? '' : $directory . '/';
 		$filename = basename($file);
 		preg_match('/^C(\d+)Index\.htm$/i', $filename, $matches);
 		$prefix = isset($matches[1]) ? (int) $matches[1] : 9999;
@@ -176,7 +183,7 @@ class Schaken_Standen_Index {
 		if (!is_readable(dirname($file) . DIRECTORY_SEPARATOR . $ranking)) {
 			return null;
 		}
-		$ranking_relative = $directory . '/' . $ranking;
+		$ranking_relative = $in_directory . $ranking;
 
 		return array(
 			'id' => sanitize_title($season . '-' . $directory . '-' . $filename),
@@ -185,8 +192,8 @@ class Schaken_Standen_Index {
 			'category_label' => $this->category_label($this->category_for($title)),
 			'file' => str_replace(DIRECTORY_SEPARATOR, '/', $relative_in_season),
 			'ranking_file' => str_replace(DIRECTORY_SEPARATOR, '/', $ranking_relative),
-			'cross_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $cross_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $directory . '/' . $cross_table) : '',
-			'score_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $score_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $directory . '/' . $score_table) : '',
+			'cross_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $cross_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $in_directory . $cross_table) : '',
+			'score_file' => is_readable(dirname($file) . DIRECTORY_SEPARATOR . $score_table) ? str_replace(DIRECTORY_SEPARATOR, '/', $in_directory . $score_table) : '',
 			'number' => $prefix,
 		);
 	}

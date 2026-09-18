@@ -448,6 +448,8 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function sanitize_and_rewrite_html($source, $season, $relative_directory, $html) {
+		// The caller passes dirname(), which is '.' for a file in the season root.
+		$relative_directory = '.' === $relative_directory ? '' : $relative_directory;
 		$html = $this->index->to_utf8($html);
 		// preg_* return null when PCRE gives up (a big cross table can get there);
 		// keep the previous stage rather than silently rendering nothing.

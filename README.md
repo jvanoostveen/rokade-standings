@@ -1,6 +1,6 @@
 # Rokade Standen
 
-WordPress-plugin voor de HTML-standen die Rokade naar een map op de server schrijft. De plugin scant uitsluitend de kleine `C*Index.htm`-bestanden. Hun `<title>` wordt de knoptekst; titels met “Doorgeef” en “Snelschaak” vormen automatisch die categorieën, de rest valt onder **Interne competitie**.
+WordPress-plugin voor de HTML-standen die Rokade naar een map op de server schrijft. De plugin scant uitsluitend de kleine `C*Index.htm`-bestanden, zowel in een submap per competitie (`<seizoen>/<groep>/C1Index.htm`) als rechtstreeks in de seizoensmap (`<seizoen>/C1Index.htm`); exports gebruiken beide indelingen door elkaar. Hun `<title>` wordt de knoptekst; titels met “Doorgeef” en “Snelschaak” vormen automatisch die categorieën, de rest valt onder **Interne competitie**.
 
 Er zijn meerdere bronpaden mogelijk, elk met een eigen label — bijvoorbeeld een aparte export voor de jeugd en voor de senioren. Elke bron wordt los geïndexeerd en is per blok of shortcode te kiezen.
 
