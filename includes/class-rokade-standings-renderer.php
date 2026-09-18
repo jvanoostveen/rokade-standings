@@ -161,7 +161,7 @@ class Schaken_Standen_Renderer {
 							<div class="schaken-standen__tabs" role="group" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
 								<?php foreach ($period['items'] as $competition) : ?>
 									<?php $is_active = 0 === $tab_number++; ?>
-									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
+									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-competition="<?php echo esc_attr($this->competition_url_key($competition)); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
 								<?php endforeach; ?>
 							</div>
 						</section>
@@ -181,6 +181,11 @@ class Schaken_Standen_Renderer {
 		</section>
 		<?php
 		return ob_get_clean();
+	}
+
+	private function competition_url_key($competition) {
+		$key = sanitize_title($competition['title']);
+		return '' !== $key ? $key : 'competitie-' . absint($competition['number']);
 	}
 
 	private function category_display_title($category, $title) {

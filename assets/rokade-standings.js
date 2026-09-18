@@ -84,7 +84,7 @@
     return null;
   }
 
-  function activateCompetition(root, category, requestedFile) {
+  function activateCompetition(root, category, requestedCompetition) {
     var group = groupFor(root, category);
     if (!group) return null;
 
@@ -100,7 +100,7 @@
     var tabs = group.querySelectorAll('.schaken-standen__tab');
     var tab = null;
     for (var index = 0; index < tabs.length; index++) {
-      if (tabs[index].dataset.file === requestedFile) {
+      if (tabs[index].dataset.competition === requestedCompetition || tabs[index].dataset.file === requestedCompetition) {
         tab = tabs[index];
         break;
       }
@@ -121,20 +121,20 @@
   function saveCompetitionInUrl(root, group, tab) {
     var url = new URL(window.location.href);
     url.searchParams.set('rokade_categorie', group.dataset.categoryPanel);
-    url.searchParams.set('rokade_competitie', tab.dataset.file);
+    url.searchParams.set('rokade_competitie', tab.dataset.competition);
     window.history.replaceState(window.history.state, '', url.toString());
   }
 
   function restoreCompetitionFromUrl(root) {
     var url = new URL(window.location.href);
     var category = url.searchParams.get('rokade_categorie');
-    var file = url.searchParams.get('rokade_competitie');
-    if (!category && file) {
+    var competition = url.searchParams.get('rokade_competitie');
+    if (!category && competition) {
       root.querySelectorAll('.schaken-standen__tab').forEach(function (tab) {
-        if (tab.dataset.file === file) category = tab.closest('.schaken-standen__group').dataset.categoryPanel;
+        if (tab.dataset.competition === competition || tab.dataset.file === competition) category = tab.closest('.schaken-standen__group').dataset.categoryPanel;
       });
     }
-    if (category) activateCompetition(root, category, file);
+    if (category) activateCompetition(root, category, competition);
   }
 
   document.addEventListener('click', function (event) {
