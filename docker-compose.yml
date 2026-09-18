@@ -12,7 +12,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./:/var/www/html/wp-content/plugins/standen-op-disk
-      - ./docs/current/standen:/var/www/html/wp-content/uploads/standen:ro
+      - ./docs/current/standen:/standen:ro
     depends_on:
       db:
         condition: service_healthy

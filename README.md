@@ -13,10 +13,10 @@ docker compose up -d
 Plaats eerst lokaal een Rokade-export onder `docs/current/standen/` (deze map staat bewust in `.gitignore`). Open daarna <http://localhost:8080>, voltooi de WordPress-installatie en activeer **Schaken in Hoogland – Standen op disk**. Ga naar **Instellingen → Schaken standen** en vul dit bronpad in:
 
 ```
-/var/www/html/wp-content/uploads/standen
+/standen
 ```
 
-De lokale exportmap wordt in de container read-only op die locatie gemount. Maak vervolgens bijvoorbeeld een pagina met:
+De lokale exportmap wordt in de container read-only als `/standen` gemount. Een export als `docs/current/standen/2026-2027/…` is in de container dus beschikbaar als `/standen/2026-2027/…`. Maak vervolgens bijvoorbeeld een pagina met:
 
 ```
 [schaken_standen seizoen="2025-2026"]
