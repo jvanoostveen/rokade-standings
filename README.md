@@ -19,18 +19,20 @@ Plaats eerst lokaal een Rokade-export onder `docs/current/standen/` (deze map st
 De lokale exportmap wordt in de container read-only als `/standen` gemount. Een export als `docs/current/standen/2026-2027/…` is in de container dus beschikbaar als `/standen/2026-2027/…`. Maak vervolgens bijvoorbeeld een pagina met:
 
 ```
-[schaken_standen seizoen="2025-2026"]
+[rokade seizoen="2025-2026"]
 ```
 
 Handige varianten:
 
 ```
-[schaken_standen seizoen="2026-2027" categorie="interne-competitie"]
-[schaken_standen seizoen="2025-2026" categorie="snelschaken"]
-[schaken_standen seizoen="2025-2026" modus="iframe"]
+[rokade seizoen="2026-2027" categorie="interne-competitie"]
+[rokade seizoen="2025-2026" categorie="snelschaken"]
+[rokade seizoen="2025-2026" modus="iframe"]
 ```
 
 Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig ingelezen en krijgt de lettertypes, kleuren en links van het WordPress-thema mee. Interne naam- en detail-links wisselen alleen dit inhoudsvak en tonen een knop om terug te keren naar de ranglijst. De knoppen blijven altijd WordPress-native. Met `modus="iframe"` wordt de oorspronkelijke HTML via een beveiligde plugin-proxy getoond; dat is nuttig wanneer de originele Rokade-layout belangrijker is.
+
+De waarde van `seizoen` moet exact de naam van een geïndexeerde seizoensmap zijn, bijvoorbeeld `2026-2027`. Een afwijkende waarde toont geen standen en kan nooit naar bestanden buiten de ingestelde standenmap verwijzen.
 
 Stop de lokale omgeving desgewenst weer met `docker compose down`. De database en WordPress-installatie blijven dan in de Docker-volumes bewaard.
 

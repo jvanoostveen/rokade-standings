@@ -77,7 +77,7 @@ class Schaken_Standen_Admin {
 			</form>
 			<hr>
 			<h2><?php esc_html_e('Shortcode', 'schaken-standen'); ?></h2>
-			<p><code>[schaken_standen seizoen="2026-2027"]</code></p>
+			<p><code>[rokade seizoen="2026-2027"]</code></p>
 			<p><?php esc_html_e('Optioneel: categorie="interne-competitie", categorie="doorgeefschaak" of categorie="snelschaken". Gebruik modus="iframe" voor de oorspronkelijke Rokade-weergave.', 'schaken-standen'); ?></p>
 		</div>
 		<?php

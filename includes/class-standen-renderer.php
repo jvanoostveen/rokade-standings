@@ -12,7 +12,7 @@ class Schaken_Standen_Renderer {
 	}
 
 	public function register() {
-		add_shortcode('schaken_standen', array($this, 'shortcode'));
+		add_shortcode('rokade', array($this, 'shortcode'));
 		add_action('wp_enqueue_scripts', array($this, 'register_assets'));
 		add_action('template_redirect', array($this, 'serve_source_file'));
 	}
@@ -27,7 +27,7 @@ class Schaken_Standen_Renderer {
 			'seizoen' => '',
 			'categorie' => '',
 			'modus' => 'inline',
-		), $attributes, 'schaken_standen');
+		), $attributes, 'rokade');
 		$data = $this->index->get_index();
 		$season = $this->choose_season($data['seasons'], $attributes['seizoen']);
 
@@ -53,8 +53,8 @@ class Schaken_Standen_Renderer {
 	}
 
 	private function choose_season($seasons, $requested) {
-		if ($requested && isset($seasons[$requested])) {
-			return $requested;
+		if ($requested) {
+			return preg_match('/^\d{4}-\d{4}$/D', $requested) && isset($seasons[$requested]) ? $requested : '';
 		}
 		$available = array_keys($seasons);
 		return $available ? end($available) : '';
