@@ -154,7 +154,7 @@ class Schaken_Standen_Renderer {
 		$html = preg_replace('/<!doctype[^>]*>|<\/?(?:html|head|body)[^>]*>|<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>|<script[^>]*>.*?<\/script>/is', '', $html);
 		$html = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($season, $relative_directory) {
 			$target = html_entity_decode($matches[3], ENT_QUOTES, 'ISO-8859-1');
-			if (preg_match('#^(?:https?:|mailto:|tel:|#|/)#i', $target)) {
+			if (preg_match('#^(?:https?:|mailto:|tel:|\#|/)#i', $target)) {
 				return $matches[0];
 			}
 			$relative = ltrim($relative_directory . '/' . $target, '/');
