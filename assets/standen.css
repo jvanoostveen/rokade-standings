@@ -8,8 +8,8 @@
 .schaken-standen__content[aria-busy="true"] { min-height: 5rem; opacity: .55; }
 .schaken-standen__back { margin-bottom: 1rem; border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .45rem .7rem; font: inherit; cursor: pointer; }
 .schaken-standen__embedded { overflow-x: auto; color: inherit; font-family: inherit; }
-.schaken-standen__embedded table { max-width: 100%; border-collapse: collapse; font: inherit !important; color: inherit !important; background: transparent !important; }
-.schaken-standen__embedded th, .schaken-standen__embedded td { padding: .35rem; border-color: currentColor; }
+.schaken-standen__embedded table { width: 100% !important; max-width: 100%; border-collapse: collapse; font: inherit !important; color: inherit !important; background: transparent !important; }
+.schaken-standen__embedded th, .schaken-standen__embedded td { padding: .5rem .45rem; border-color: currentColor; vertical-align: middle; }
 .schaken-standen__embedded a { color: inherit; }
 .schaken-standen__frame { width: 100%; min-height: 46rem; border: 0; }
 .schaken-standen__notice { padding: 1rem; border-left: 4px solid #d63638; background: #fcf0f1; }
