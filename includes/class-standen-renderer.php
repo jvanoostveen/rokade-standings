@@ -63,6 +63,9 @@ class Schaken_Standen_Renderer {
 	private function render($season, $competitions, $iframe) {
 		$categories = array();
 		foreach ($competitions as $competition) {
+			if ('interne-competitie' !== $competition['category']) {
+				$competition['display_title'] = $this->category_display_title($competition['category'], $competition['title']);
+			}
 			$categories[$competition['category']]['label'] = $competition['category_label'];
 			$categories[$competition['category']]['items'][] = $competition;
 		}
@@ -110,6 +113,13 @@ class Schaken_Standen_Renderer {
 		</section>
 		<?php
 		return ob_get_clean();
+	}
+
+	private function category_display_title($category, $title) {
+		if (in_array($category, array('doorgeefschaak', 'snelschaken'), true) && preg_match('/\\bblok\\s+(\\d+)\\b/ui', $title, $matches)) {
+			return sprintf(__('Blok %d', 'schaken-standen'), (int) $matches[1]);
+		}
+		return $title;
 	}
 
 	private function periods_for_category($season, $category, $items) {
