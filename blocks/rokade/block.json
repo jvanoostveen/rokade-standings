@@ -3,11 +3,12 @@
 	"apiVersion": 3,
 	"name": "schaken-standen/rokade",
 	"title": "Rokade standen",
-	"description": "Toon Rokade-standen met instelbaar seizoen, competitie en weergave.",
+	"description": "Toon Rokade-standen met instelbare bron, seizoen, competitie en weergave.",
 	"category": "widgets",
 	"icon": "chart-bar",
 	"textdomain": "schaken-standen",
 	"attributes": {
+		"bron": { "type": "string", "default": "" },
 		"seizoen": { "type": "string", "default": "" },
 		"categorie": { "type": "string", "default": "" },
 		"modus": { "type": "string", "default": "inline" }

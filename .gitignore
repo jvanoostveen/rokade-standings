@@ -2,8 +2,9 @@
 .DS_Store
 
 # Lokale Rokade-exporten kunnen persoonsgegevens en databasebestanden bevatten.
-# Plaats ze lokaal in deze map voor Docker; ze worden nooit gecommit.
-/docs/current/standen/
+# Plaats ze lokaal in deze map voor Docker; ze worden nooit gecommit. Elke
+# submap kan een eigen bron zijn, bijvoorbeeld docs/current/senioren.
+/docs/current/*
 
 # Lokaal gegenereerde WordPress-pluginpakketten.
 /dist/

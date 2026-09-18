@@ -30,8 +30,10 @@
 
   function endpointFor(root, file) {
     var endpoint = new URL(window.location.href);
+    endpoint.searchParams.delete('rokade_bron');
     endpoint.searchParams.delete('rokade_categorie');
     endpoint.searchParams.delete('rokade_competitie');
+    endpoint.searchParams.set('schaken_standen_source', root.dataset.source);
     endpoint.searchParams.set('schaken_standen_season', root.dataset.season);
     endpoint.searchParams.set('schaken_standen_file', file);
     return endpoint.toString();
@@ -137,6 +139,7 @@
 
   function saveCompetitionInUrl(root, group, tab) {
     var url = new URL(window.location.href);
+    url.searchParams.set('rokade_bron', root.dataset.source);
     url.searchParams.set('rokade_categorie', group.dataset.categoryPanel);
     url.searchParams.set('rokade_competitie', tab.dataset.competition);
     window.history.replaceState(window.history.state, '', url.toString());
@@ -144,6 +147,10 @@
 
   function restoreCompetitionFromUrl(root) {
     var url = new URL(window.location.href);
+    // Two blocks on one page can show different sources; the link belongs to the
+    // one it was saved from, not to whichever block happens to share a tab name.
+    var source = url.searchParams.get('rokade_bron');
+    if (source && source !== root.dataset.source) return;
     var category = url.searchParams.get('rokade_categorie');
     var competition = url.searchParams.get('rokade_competitie');
     if (!category && competition) {

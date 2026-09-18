@@ -6,27 +6,83 @@ if (!defined('ABSPATH')) {
 
 /** Reads the small Index.htm files once and caches their metadata in a transient. */
 class Schaken_Standen_Index {
-	const CACHE_KEY = 'schaken_standen_index_v2';
+	const CACHE_KEY = 'schaken_standen_index_v3';
 
 	public function settings() {
 		$settings = get_option('schaken_standen_settings', array());
+		if (!is_array($settings)) {
+			$settings = array();
+		}
+
+		// Installs from before multiple sources stored one bare path. Turn it into
+		// the first labelled source on read; the next save writes the new shape.
+		if (!isset($settings['sources']) && isset($settings['source_path'])) {
+			$legacy = untrailingslashit(trim((string) $settings['source_path']));
+			$settings['sources'] = '' === $legacy ? '' : $legacy . ' | ' . __('Standen', 'schaken-standen');
+		}
+		unset($settings['source_path']);
+
 		return wp_parse_args($settings, array(
-			'source_path' => '',
+			'sources' => '',
 			'cache_minutes' => 15,
 			'internal_group_order' => "Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon",
 			'block_button_templates' => "doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}",
 		));
 	}
 
-	public function source_path() {
-		$settings = $this->settings();
-		return untrailingslashit((string) $settings['source_path']);
+	/**
+	 * The configured sources as id => array('id', 'label', 'path').
+	 *
+	 * Read straight from the settings rather than from the cached index, so a
+	 * path that was removed stops serving files immediately instead of after the
+	 * transient expires.
+	 */
+	public function sources() {
+		$lines = preg_split('/\r\n|\r|\n/', (string) $this->settings()['sources']);
+		$sources = array();
+
+		foreach ($lines as $line) {
+			$parts = array_map('trim', explode('|', $line, 2));
+			$path = untrailingslashit($parts[0]);
+			if ('' === $path) {
+				continue;
+			}
+
+			$label = (isset($parts[1]) && '' !== $parts[1]) ? $parts[1] : basename($path);
+			$id = sanitize_title($label);
+			if ('' === $id) {
+				$id = 'bron';
+			}
+
+			// Two sources may carry the same label; the id is what a shortcode and
+			// a deep link refer to, so it has to stay unique.
+			$candidate = $id;
+			$suffix = 2;
+			while (isset($sources[$candidate])) {
+				$candidate = $id . '-' . $suffix;
+				$suffix++;
+			}
+
+			$sources[$candidate] = array('id' => $candidate, 'label' => $label, 'path' => $path);
+		}
+
+		return $sources;
+	}
+
+	public function source_path($source_id) {
+		$sources = $this->sources();
+		return isset($sources[$source_id]) ? $sources[$source_id]['path'] : '';
+	}
+
+	public function default_source_id() {
+		$ids = array_keys($this->sources());
+		return $ids ? $ids[0] : '';
 	}
 
 	public function get_index($force = false) {
 		if (!$force) {
 			$cached = get_transient(self::CACHE_KEY);
-			if (is_array($cached)) {
+			if (is_array($cached) && isset($cached['sources'])) {
 				return $cached;
 			}
 		}
@@ -35,14 +91,34 @@ class Schaken_Standen_Index {
 	}
 
 	public function refresh() {
-		$root = $this->source_path();
-		$index = array('seasons' => array(), 'updated_at' => time());
+		$index = array('sources' => array(), 'updated_at' => time());
 
+		foreach ($this->sources() as $id => $source) {
+			$index['sources'][$id] = array(
+				'label' => $source['label'],
+				'path' => $source['path'],
+				'seasons' => $this->scan($source['path']),
+			);
+		}
+
+		// Cache the misses too, otherwise every page view stats an unreachable
+		// (possibly networked) path again.
+		$this->store($index);
+		return $index;
+	}
+
+	public function cache_minutes() {
+		return min(1440, max(1, absint($this->settings()['cache_minutes'])));
+	}
+
+	public function clear() {
+		delete_transient(self::CACHE_KEY);
+	}
+
+	private function scan($root) {
+		$seasons = array();
 		if (!$root || !is_dir($root) || !is_readable($root)) {
-			// Cache the miss too, otherwise every page view stats an unreachable
-			// (possibly networked) path again.
-			$this->store($index);
-			return $index;
+			return $seasons;
 		}
 
 		$season_dirs = glob($root . '/*', GLOB_ONLYDIR);
@@ -67,21 +143,12 @@ class Schaken_Standen_Index {
 
 			usort($competitions, array($this, 'sort_competitions'));
 			if ($competitions) {
-				$index['seasons'][$season] = $competitions;
+				$seasons[$season] = $competitions;
 			}
 		}
 
-		uksort($index['seasons'], 'version_compare');
-		$this->store($index);
-		return $index;
-	}
-
-	public function cache_minutes() {
-		return min(1440, max(1, absint($this->settings()['cache_minutes'])));
-	}
-
-	public function clear() {
-		delete_transient(self::CACHE_KEY);
+		uksort($seasons, 'version_compare');
+		return $seasons;
 	}
 
 	private function store($index) {

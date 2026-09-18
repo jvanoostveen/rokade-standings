@@ -62,19 +62,29 @@ class Schaken_Standen_Renderer {
 	/** Supplies editor dropdown options from the current, cached standings index. */
 	private function block_options() {
 		$data = $this->index->get_index();
-		$season_categories = array();
-		foreach ($data['seasons'] as $season => $competitions) {
-			$categories = array();
-			foreach ($competitions as $competition) {
-				$categories[$competition['category']] = $competition['category_label'];
+		$sources = array();
+		foreach ($data['sources'] as $id => $source) {
+			$season_categories = array();
+			foreach ($source['seasons'] as $season => $competitions) {
+				$categories = array();
+				foreach ($competitions as $competition) {
+					$categories[$competition['category']] = $competition['category_label'];
+				}
+				$season_categories[$season] = $categories;
 			}
-			$season_categories[$season] = $categories;
+
+			$sources[] = array(
+				'id' => $id,
+				'label' => $source['label'],
+				'seasons' => array_keys($source['seasons']),
+				'seasonCategories' => $season_categories,
+			);
 		}
 
 		return array(
-			'seasons' => array_keys($data['seasons']),
-			'seasonCategories' => $season_categories,
+			'sources' => $sources,
 			'labels' => array(
+				'defaultSource' => __('Eerste bron', 'schaken-standen'),
 				'latestSeason' => __('Meest recente seizoen', 'schaken-standen'),
 				'allCategories' => __('Alle competities', 'schaken-standen'),
 				'inline' => __('Inline (in de pagina)', 'schaken-standen'),
@@ -89,20 +99,22 @@ class Schaken_Standen_Renderer {
 
 	public function shortcode($attributes) {
 		$attributes = shortcode_atts(array(
+			'bron' => '',
 			'seizoen' => '',
 			'categorie' => '',
 			'modus' => 'inline',
 		), $attributes, 'rokade');
 		$data = $this->index->get_index();
-		$season = $this->choose_season($data['seasons'], $attributes['seizoen']);
+		$source = $this->choose_source($data['sources'], $attributes['bron']);
+		$season = $source ? $this->choose_season($data['sources'][$source]['seasons'], $attributes['seizoen']) : '';
 
 		if (!$season) {
 			return current_user_can('manage_options')
-				? '<p class="schaken-standen__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel het bronpad in onder Instellingen → Rokade Standen.', 'schaken-standen') . '</p>'
+				? '<p class="schaken-standen__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel de bronpaden in onder Instellingen → Rokade Standen.', 'schaken-standen') . '</p>'
 				: '';
 		}
 
-		$competitions = $data['seasons'][$season];
+		$competitions = $data['sources'][$source]['seasons'][$season];
 		if ($attributes['categorie']) {
 			$competitions = array_values(array_filter($competitions, function ($competition) use ($attributes) {
 				return $competition['category'] === sanitize_title($attributes['categorie']);
@@ -114,7 +126,26 @@ class Schaken_Standen_Renderer {
 
 		wp_enqueue_style('schaken-standen');
 		wp_enqueue_script('schaken-standen');
-		return $this->render($season, $competitions, 'iframe' === $attributes['modus'], empty($attributes['categorie']));
+		return $this->render($source, $season, $competitions, 'iframe' === $attributes['modus'], empty($attributes['categorie']));
+	}
+
+	/**
+	 * Without an explicit source, prefer the first one that actually yielded
+	 * standings: a site whose first configured path is temporarily unreachable
+	 * should still show the other ones rather than an empty block.
+	 */
+	private function choose_source($sources, $requested) {
+		$requested = is_scalar($requested) ? sanitize_title((string) $requested) : '';
+		if ('' !== $requested) {
+			return isset($sources[$requested]) ? $requested : '';
+		}
+		foreach ($sources as $id => $source) {
+			if ($source['seasons']) {
+				return $id;
+			}
+		}
+		$available = array_keys($sources);
+		return $available ? $available[0] : '';
 	}
 
 	private function choose_season($seasons, $requested) {
@@ -125,7 +156,7 @@ class Schaken_Standen_Renderer {
 		return $available ? end($available) : '';
 	}
 
-	private function render($season, $competitions, $iframe, $show_categories = true) {
+	private function render($source, $season, $competitions, $iframe, $show_categories = true) {
 		$categories = array();
 		foreach ($competitions as $competition) {
 			if ('interne-competitie' !== $competition['category']) {
@@ -155,7 +186,7 @@ class Schaken_Standen_Renderer {
 
 		ob_start();
 		?>
-		<section class="schaken-standen" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-season="<?php echo esc_attr($season); ?>">
+		<section class="schaken-standen" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-source="<?php echo esc_attr($source); ?>" data-season="<?php echo esc_attr($season); ?>">
 			<?php if ($show_categories) : ?>
 				<div class="schaken-standen__categories" role="group" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
 					<?php foreach ($categories as $key => $category) : ?>
@@ -185,7 +216,7 @@ class Schaken_Standen_Renderer {
 					</div>
 					<div class="schaken-standen__content" id="<?php echo esc_attr($content_id); ?>" role="region" aria-label="<?php esc_attr_e('Standen', 'schaken-standen'); ?>" aria-live="polite">
 						<?php if ($key === $first_category) : ?>
-							<?php echo $this->render_file($season, $first_item['ranking_file'], $iframe); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->render_file($source, $season, $first_item['ranking_file'], $iframe); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
 					</div>
 				</div>
@@ -349,27 +380,33 @@ class Schaken_Standen_Renderer {
 		return $output;
 	}
 
-	private function render_file($season, $relative_file, $iframe) {
-		$url = $this->file_url($season, $relative_file);
+	private function render_file($source, $season, $relative_file, $iframe) {
+		$url = $this->file_url($source, $season, $relative_file);
 		if ($iframe) {
 			return '<iframe class="schaken-standen__frame" title="' . esc_attr__('Standen', 'schaken-standen') . '" src="' . esc_url($url) . '" loading="lazy" sandbox="allow-same-origin"></iframe>';
 		}
 
-		$contents = $this->get_file_contents($season, $relative_file);
+		$contents = $this->get_file_contents($source, $season, $relative_file);
 		if (null === $contents) {
 			return '<p class="schaken-standen__notice">' . esc_html__('Dit standenbestand kan niet worden gelezen.', 'schaken-standen') . '</p>';
 		}
 
-		return '<div class="schaken-standen__embedded">' . $this->sanitize_and_rewrite_html($season, dirname($relative_file), $contents) . '</div>';
+		return '<div class="schaken-standen__embedded">' . $this->sanitize_and_rewrite_html($source, $season, dirname($relative_file), $contents) . '</div>';
 	}
 
 	public function serve_source_file() {
 		if (!isset($_GET['schaken_standen_file'], $_GET['schaken_standen_season'])) {
 			return;
 		}
+		// Pages rendered before the plugin knew about multiple sources link
+		// without one; those installs only ever had a single source anyway.
+		$requested_source = isset($_GET['schaken_standen_source']) ? wp_unslash($_GET['schaken_standen_source']) : '';
+		$source = is_scalar($requested_source) && '' !== $requested_source
+			? sanitize_title((string) $requested_source)
+			: $this->index->default_source_id();
 		$season = sanitize_text_field(wp_unslash($_GET['schaken_standen_season']));
 		$file = sanitize_text_field(wp_unslash($_GET['schaken_standen_file']));
-		$contents = $this->get_file_contents($season, $file);
+		$contents = $this->get_file_contents($source, $season, $file);
 		if (null === $contents) {
 			status_header(404);
 			exit;
@@ -378,26 +415,29 @@ class Schaken_Standen_Renderer {
 		nocache_headers();
 		header('Content-Type: text/html; charset=UTF-8');
 		header('X-Content-Type-Options: nosniff');
-		echo $this->sanitize_and_rewrite_html($season, dirname($file), $contents); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->sanitize_and_rewrite_html($source, $season, dirname($file), $contents); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit;
 	}
 
-	private function file_url($season, $file) {
+	private function file_url($source, $season, $file) {
 		return add_query_arg(array(
+			'schaken_standen_source' => $source,
 			'schaken_standen_season' => $season,
 			'schaken_standen_file' => $file,
 		), home_url('/'));
 	}
 
-	private function get_file_contents($season, $relative_file) {
+	private function get_file_contents($source, $season, $relative_file) {
 		if (basename($season) !== $season || false !== strpos($season, "\0") || !preg_match('/^[A-Za-z0-9_ .\/()-]+\.html?$/i', $relative_file)) {
 			return null;
 		}
-		$known_seasons = $this->index->get_index();
-		if (!isset($known_seasons['seasons'][$season])) {
+		$index = $this->index->get_index();
+		if (!isset($index['sources'][$source]['seasons'][$season])) {
 			return null;
 		}
-		$root = realpath($this->index->source_path());
+		// Against the configured path, not the cached one: a source removed from
+		// the settings must stop serving files before the transient expires.
+		$root = realpath($this->index->source_path($source));
 		$path = realpath($root . DIRECTORY_SEPARATOR . $season . DIRECTORY_SEPARATOR . $relative_file);
 		$season_root = realpath($root . DIRECTORY_SEPARATOR . $season);
 		if (!$root || !$season_root || !$path || 0 !== strpos($path, $season_root . DIRECTORY_SEPARATOR) || !is_readable($path)) {
@@ -407,19 +447,19 @@ class Schaken_Standen_Renderer {
 		return false === $contents ? null : $contents;
 	}
 
-	private function sanitize_and_rewrite_html($season, $relative_directory, $html) {
+	private function sanitize_and_rewrite_html($source, $season, $relative_directory, $html) {
 		$html = $this->index->to_utf8($html);
 		// preg_* return null when PCRE gives up (a big cross table can get there);
 		// keep the previous stage rather than silently rendering nothing.
 		$stripped = preg_replace('/<!doctype[^>]*>|<\/?(?:html|head|body)[^>]*>|<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>|<script[^>]*>.*?<\/script>/is', '', $html);
 		$html = null === $stripped ? $html : $stripped;
-		$rewritten = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($season, $relative_directory) {
+		$rewritten = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($source, $season, $relative_directory) {
 			$target = html_entity_decode($matches[3], ENT_QUOTES, 'UTF-8');
 			if (preg_match('#^(?:https?:|mailto:|tel:|\#|/)#i', $target)) {
 				return $matches[0];
 			}
 			$relative = ltrim($relative_directory . '/' . $target, '/');
-			return $matches[1] . '=' . $matches[2] . esc_url($this->file_url($season, $relative)) . $matches[2];
+			return $matches[1] . '=' . $matches[2] . esc_url($this->file_url($source, $season, $relative)) . $matches[2];
 		}, $html);
 		$html = null === $rewritten ? $html : $rewritten;
 
