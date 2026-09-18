@@ -30,8 +30,8 @@ staging_dir="$(mktemp -d "${TMPDIR:-/tmp}/${plugin_slug}.XXXXXX")"
 trap 'rm -rf "${staging_dir}"' EXIT
 
 mkdir -p "${staging_dir}/${plugin_slug}" "${dist_dir}"
-cp "${plugin_file}" "${staging_dir}/${plugin_slug}/"
-cp -R "${project_dir}/assets" "${project_dir}/includes" "${staging_dir}/${plugin_slug}/"
+cp "${plugin_file}" "${project_dir}/uninstall.php" "${staging_dir}/${plugin_slug}/"
+cp -R "${project_dir}/assets" "${project_dir}/includes" "${project_dir}/blocks" "${staging_dir}/${plugin_slug}/"
 
 if [ -f "${project_dir}/README.md" ]; then
 	cp "${project_dir}/README.md" "${staging_dir}/${plugin_slug}/"
