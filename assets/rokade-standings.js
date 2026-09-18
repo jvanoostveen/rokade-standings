@@ -43,6 +43,7 @@
       frame.className = 'schaken-standen__frame';
       frame.title = text('frameTitle', 'Standen');
       frame.loading = 'lazy';
+      frame.setAttribute('sandbox', 'allow-same-origin');
       frame.src = endpoint;
       content.textContent = '';
       content.appendChild(frame);

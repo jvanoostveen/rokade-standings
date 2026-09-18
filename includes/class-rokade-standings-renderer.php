@@ -331,7 +331,7 @@ class Schaken_Standen_Renderer {
 	private function render_file($season, $relative_file, $iframe) {
 		$url = $this->file_url($season, $relative_file);
 		if ($iframe) {
-			return '<iframe class="schaken-standen__frame" title="' . esc_attr__('Standen', 'schaken-standen') . '" src="' . esc_url($url) . '" loading="lazy"></iframe>';
+			return '<iframe class="schaken-standen__frame" title="' . esc_attr__('Standen', 'schaken-standen') . '" src="' . esc_url($url) . '" loading="lazy" sandbox="allow-same-origin"></iframe>';
 		}
 
 		$contents = $this->get_file_contents($season, $relative_file);
@@ -356,6 +356,7 @@ class Schaken_Standen_Renderer {
 
 		nocache_headers();
 		header('Content-Type: text/html; charset=UTF-8');
+		header('X-Content-Type-Options: nosniff');
 		echo $this->sanitize_and_rewrite_html($season, dirname($file), $contents); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit;
 	}
@@ -387,8 +388,11 @@ class Schaken_Standen_Renderer {
 
 	private function sanitize_and_rewrite_html($season, $relative_directory, $html) {
 		$html = $this->index->to_utf8($html);
-		$html = preg_replace('/<!doctype[^>]*>|<\/?(?:html|head|body)[^>]*>|<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>|<script[^>]*>.*?<\/script>/is', '', $html);
-		$html = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($season, $relative_directory) {
+		// preg_* return null when PCRE gives up (a big cross table can get there);
+		// keep the previous stage rather than silently rendering nothing.
+		$stripped = preg_replace('/<!doctype[^>]*>|<\/?(?:html|head|body)[^>]*>|<meta[^>]*>|<title[^>]*>.*?<\/title>|<style[^>]*>.*?<\/style>|<script[^>]*>.*?<\/script>/is', '', $html);
+		$html = null === $stripped ? $html : $stripped;
+		$rewritten = preg_replace_callback('/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i', function ($matches) use ($season, $relative_directory) {
 			$target = html_entity_decode($matches[3], ENT_QUOTES, 'UTF-8');
 			if (preg_match('#^(?:https?:|mailto:|tel:|\#|/)#i', $target)) {
 				return $matches[0];
@@ -396,6 +400,7 @@ class Schaken_Standen_Renderer {
 			$relative = ltrim($relative_directory . '/' . $target, '/');
 			return $matches[1] . '=' . $matches[2] . esc_url($this->file_url($season, $relative)) . $matches[2];
 		}, $html);
+		$html = null === $rewritten ? $html : $rewritten;
 
 		// Merge onto the post defaults; assigning would drop scope/headers/abbr on
 		// table cells and rel on links, which is exactly what keeps a standings

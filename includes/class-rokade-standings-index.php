@@ -171,7 +171,7 @@ class Schaken_Standen_Index {
 			'doorgeefschaak' => __('Doorgeefschaak', 'schaken-standen'),
 			'snelschaken' => __('Snelschaken', 'schaken-standen'),
 		);
-		return $labels[$category];
+		return isset($labels[$category]) ? $labels[$category] : $category;
 	}
 
 	private function sort_competitions($a, $b) {
