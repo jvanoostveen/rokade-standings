@@ -19,7 +19,8 @@
     return endpoint.toString();
   }
 
-  function showCompetition(root, content, file) {
+  function showCompetition(root, content, file, compact) {
+    content.classList.toggle('is-compact-view', Boolean(compact));
     var endpoint = endpointFor(root, file);
     if (root.dataset.mode === 'iframe') {
       content.innerHTML = '<iframe class="schaken-standen__frame" title="Standen" src="' + endpoint + '" loading="lazy"></iframe>';
@@ -32,9 +33,9 @@
     var views = group.querySelector('.schaken-standen__views');
     if (!views) return;
     var options = [
-      { label: 'Ranglijst', file: tab.dataset.file },
-      { label: 'Kruistabel', file: tab.dataset.crossFile },
-      { label: 'Scoretabel', file: tab.dataset.scoreFile }
+      { label: 'Ranglijst', file: tab.dataset.file, compact: false },
+      { label: 'Kruistabel', file: tab.dataset.crossFile, compact: true },
+      { label: 'Scoretabel', file: tab.dataset.scoreFile, compact: true }
     ];
     views.textContent = '';
     options.forEach(function (option) {
@@ -43,6 +44,7 @@
       view.type = 'button';
       view.className = 'schaken-standen__view' + (option.file === activeFile ? ' is-active' : '');
       view.dataset.file = option.file;
+      view.dataset.compact = option.compact ? 'true' : 'false';
       view.textContent = option.label;
       views.appendChild(view);
     });
@@ -54,7 +56,7 @@
       var backRoot = back.closest('.schaken-standen');
       var activeTab = backRoot.querySelector('.schaken-standen__group.is-active .schaken-standen__tab.is-active');
       if (!activeTab) return;
-      showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file);
+      showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file, false);
       return;
     }
 
@@ -63,7 +65,7 @@
       var viewGroup = view.closest('.schaken-standen__group');
       var viewRoot = view.closest('.schaken-standen');
       viewGroup.querySelectorAll('.schaken-standen__view').forEach(function (item) { item.classList.toggle('is-active', item === view); });
-      showCompetition(viewRoot, viewGroup.querySelector('.schaken-standen__content'), view.dataset.file);
+      showCompetition(viewRoot, viewGroup.querySelector('.schaken-standen__content'), view.dataset.file, view.dataset.compact === 'true');
       return;
     }
 
@@ -95,7 +97,7 @@
         item.setAttribute('aria-selected', active ? 'true' : 'false');
       });
       updateViews(group, firstTab, firstTab.dataset.file);
-      showCompetition(root, group.querySelector('.schaken-standen__content'), firstTab.dataset.file);
+      showCompetition(root, group.querySelector('.schaken-standen__content'), firstTab.dataset.file, false);
       return;
     }
 
@@ -106,6 +108,6 @@
     });
     updateViews(button.closest('.schaken-standen__group'), button, button.dataset.file);
     var content = button.closest('.schaken-standen__group').querySelector('.schaken-standen__content');
-    showCompetition(root, content, button.dataset.file);
+    showCompetition(root, content, button.dataset.file, false);
   });
 }());

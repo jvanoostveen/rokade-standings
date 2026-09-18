@@ -297,16 +297,16 @@ class Schaken_Standen_Renderer {
 
 	private function render_view_buttons($competition) {
 		$views = array(
-			array('label' => __('Ranglijst', 'schaken-standen'), 'file' => $competition['ranking_file']),
-			array('label' => __('Kruistabel', 'schaken-standen'), 'file' => $competition['cross_file']),
-			array('label' => __('Scoretabel', 'schaken-standen'), 'file' => $competition['score_file']),
+			array('label' => __('Ranglijst', 'schaken-standen'), 'file' => $competition['ranking_file'], 'compact' => false),
+			array('label' => __('Kruistabel', 'schaken-standen'), 'file' => $competition['cross_file'], 'compact' => true),
+			array('label' => __('Scoretabel', 'schaken-standen'), 'file' => $competition['score_file'], 'compact' => true),
 		);
 		$output = '';
 		foreach ($views as $view) {
 			if (!$view['file']) {
 				continue;
 			}
-			$output .= '<button type="button" class="schaken-standen__view' . ($view['file'] === $competition['ranking_file'] ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '">' . esc_html($view['label']) . '</button>';
+			$output .= '<button type="button" class="schaken-standen__view' . ($view['file'] === $competition['ranking_file'] ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '" data-compact="' . ($view['compact'] ? 'true' : 'false') . '">' . esc_html($view['label']) . '</button>';
 		}
 		return $output;
 	}

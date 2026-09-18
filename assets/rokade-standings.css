@@ -16,6 +16,7 @@
 .schaken-standen__embedded th:first-child:not([colspan]), .schaken-standen__embedded td:first-child:not([colspan]) { width: 1%; white-space: nowrap; }
 .schaken-standen__embedded th:nth-child(2):not([colspan]), .schaken-standen__embedded td:nth-child(2):not([colspan]) { width: 20%; min-width: 7rem; max-width: 12rem; overflow-wrap: anywhere; }
 .schaken-standen__embedded th:nth-child(n+3):not([colspan]), .schaken-standen__embedded td:nth-child(n+3):not([colspan]) { width: 10%; white-space: nowrap; }
+.schaken-standen__content.is-compact-view .schaken-standen__embedded th:nth-child(n+3):not([colspan]), .schaken-standen__content.is-compact-view .schaken-standen__embedded td:nth-child(n+3):not([colspan]) { width: 1%; }
 .schaken-standen__embedded th:nth-child(n+3):not([colspan]), .schaken-standen__embedded td:nth-child(n+3):not([colspan]) { text-align: right; }
 .schaken-standen__embedded th[colspan], .schaken-standen__embedded td[colspan] { width: auto; white-space: normal; }
 .schaken-standen__embedded a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .15em; }
