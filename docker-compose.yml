@@ -19,6 +19,27 @@ services:
       db:
         condition: service_healthy
 
+  # Alleen voor gereedschap: `docker compose run --rm wpcli wp <commando>`.
+  # Het profiel houdt de service buiten een gewone `docker compose up`.
+  wpcli:
+    image: wordpress:cli-php8.3
+    profiles: ["tools"]
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/rokade-standings
+      - ./docs/current/standen:/standen:ro
+      - ./docs/current/senioren:/senioren:ro
+      - ./themes:/var/www/html/wp-content/themes:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: mariadb:11.4
     environment:

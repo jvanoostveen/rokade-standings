@@ -4,7 +4,15 @@ WordPress-plugin voor de HTML-standen die Rokade naar een map op de server schri
 
 Er zijn meerdere bronpaden mogelijk, elk met een eigen label — bijvoorbeeld een aparte export voor de jeugd en voor de senioren. Elke bron wordt los geïndexeerd en is per blok of shortcode te kiezen.
 
-De cache voorkomt dat bij elke paginaview de directory wordt doorzocht. De index is een WordPress transient met een instelbare levensduur (standaard 15 minuten), wordt elk uur opgewarmd via WP-Cron en kan via de instellingen onmiddellijk worden vernieuwd.
+De cache voorkomt dat bij elke paginaview de directory wordt doorzocht. De index is een WordPress transient met een instelbare levensduur (standaard 15 minuten), wordt via WP-Cron op de achtergrond opgewarmd voordat hij verloopt en kan via de instellingen onmiddellijk worden vernieuwd.
+
+## Handleiding
+
+Voor beheerders van de site staat er een handleiding met schermafbeeldingen en video in
+[`docs/handleiding/`](docs/handleiding/README.md): deel 1 gaat over installeren en instellen,
+deel 2 over het plaatsen van het blok op een pagina. De beelden worden opgenomen door het
+scenario in [`tools/handleiding/`](tools/handleiding/README.md), zodat ze na een nieuwe
+feature in één opdracht opnieuw te maken zijn.
 
 ## Lokaal starten met OrbStack/Docker
 

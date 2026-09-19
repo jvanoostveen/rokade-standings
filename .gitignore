@@ -8,3 +8,7 @@
 
 # Lokaal gegenereerde WordPress-pluginpakketten.
 /dist/
+
+# Lokale inloggegevens voor het handleidingscenario.
+/tools/handleiding/.env
+/tools/handleiding/node_modules/
