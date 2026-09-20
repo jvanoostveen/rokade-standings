@@ -166,7 +166,7 @@ export default {
 
 		const weergaven = standen.locator('.schaken-standen__group.is-active .schaken-standen__view');
 		if (await weergaven.count()) {
-			await ui.stap('Bevat de export een kruistabel of scoretabel, dan verschijnen die knoppen vanzelf.', { wacht: 1300 });
+			await ui.stap('Bevat de export een kruistabel of scoretabel, dan verschijnen die als tabbladen boven de tabel.', { wacht: 1300 });
 			await ui.schermafbeelding('resultaat-04-weergaveknoppen', {
 				locator: standen.locator('.schaken-standen__group.is-active .schaken-standen__views').first(),
 				marge: 10,

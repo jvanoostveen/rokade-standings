@@ -301,8 +301,8 @@ de volgorde die je bij de instellingen hebt opgegeven.
 ![Knoppen per groep](media/schermafbeeldingen/resultaat-03-groepen.png)
 
 **Ranglijst, kruistabel, scoretabel.** Bevat de export een kruistabel of scoretabel, dan
-verschijnen die knoppen vanzelf. Ze laden in hetzelfde vak; de rest van de pagina blijft
-staan.
+verschijnen deze als tabbladen boven de tabel. Het actieve tabblad sluit visueel aan op de
+bijbehorende tabel. De weergaven laden in hetzelfde vak; de rest van de pagina blijft staan.
 
 ![Weergaveknoppen](media/schermafbeeldingen/resultaat-04-weergaveknoppen.png)
 
