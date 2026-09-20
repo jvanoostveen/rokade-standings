@@ -13,14 +13,28 @@ import { dirname, join, normalize, resolve } from 'node:path';
 const demoDir = resolve(process.argv[2] || 'demo');
 
 const voornamen = [
-	'Aurel', 'Bexley', 'Cyran', 'Daxen', 'Elvar', 'Faryn', 'Gavren', 'Helix', 'Ilyra', 'Jorven',
-	'Korin', 'Lioren', 'Mavik', 'Nirel', 'Orvyn', 'Paxen', 'Quorin', 'Riven', 'Sorel', 'Taryn',
-	'Ulan', 'Veyra', 'Wexen', 'Xyra', 'Yorin', 'Zavik',
+	'Anne', 'Bram', 'Carlijn', 'Daan', 'Eline', 'Fleur', 'Gijs', 'Hanne', 'Iris', 'Jelle',
+	'Kiki', 'Lars', 'Maaike', 'Niels', 'Olivier', 'Pien', 'Quinten', 'Renske', 'Sander', 'Tessa',
+	'Udo', 'Vera', 'Wouter', 'Xandra', 'Yvonne', 'Zeger', 'Anouk', 'Bas', 'Cato', 'Diederik',
+	'Elise', 'Floris', 'Gwen', 'Hugo', 'Ilse', 'Joris', 'Karin', 'Lieke', 'Maarten', 'Noor',
 ];
 const achternamen = [
-	'Avens', 'Belvar', 'Corven', 'Dorsen', 'Elyon', 'Faron', 'Galdor', 'Haven', 'Ivers', 'Jorin',
-	'Keldan', 'Lorven', 'Merrow', 'Noran', 'Orsel', 'Pavel', 'Quaren', 'Rovik', 'Seldon', 'Tavor',
-	'Uvren', 'Varen', 'Weylin', 'Xandor', 'Yoren', 'Zerik',
+	'Bakker', 'de Boer', 'Bos', 'Brouwer', 'de Bruin', 'de Graaf', 'de Groot', 'de Haan', 'de Jong', 'de Vries',
+	'Dijkstra', 'Evers', 'Faber', 'van Gaalen', 'Groen', 'Hendriks', 'Hoekstra', 'Jansen', 'Koster', 'Kuiper',
+	'van Loon', 'Meijer', 'Mulder', 'Nijland', 'Oosterhuis', 'Pieters', 'Postma', 'Prins', 'van der Put', 'Roos',
+	'Schouten', 'Smit', 'Smittenaar', 'Sonneveld', 'Timmer', 'van Tol', 'Verbeek', 'Verhoeven', 'Visser', 'Vos',
+	'van Wijk', 'Willems', 'Wolters', 'van Zanten', 'Zuidema', 'Aarts', 'Baars', 'Beekman', 'Bergman', 'van den Berg',
+	'Bijl', 'Blom', 'van Dijk', 'Driessen', 'Eijck', 'van Es', 'Fransen', 'Gerritsen', 'Grootveld', 'van der Heijden',
+	'Heijmans', 'Hofman', 'Huisman', 'Jacobs', 'Kampman', 'Kerkhof', 'Klein', 'Koning', 'Kruis', 'Lammers',
+	'Leenders', 'Lemmens', 'Lindenberg', 'Maas', 'Martens', 'de Meijer', 'van der Meer', 'Molenaar', 'van den Oever', 'Otten',
+	'Pietersen', 'van Rijn', 'Rietveld', 'Schaap', 'Scholten', 'Slagter', 'Smitveld', 'Snijders', 'Stolwijk', 'Talen',
+	'Teunissen', 'Veldhuis', 'Vermeer', 'Vink', 'van der Vliet', 'van Veen', 'de Waard', 'Wessels', 'Wiersma', 'Wouters',
+	'Zandstra', 'Zwart', 'Aalbers', 'Baas', 'Beumer', 'Boonstra', 'van Dam', 'Davelaar', 'van Doorn', 'Drost',
+	'van Eeden', 'Engels', 'Fokkema', 'Gelderman', 'Geurts', 'Hagen', 'Harmsen', 'Hazenberg', 'Helleman', 'Hofstede',
+	'van der Horst', 'Janssen', 'Klaassen', 'Kleijn', 'Kramer', 'van Kooten', 'Landman', 'Langeveld', 'Loonen', 'van der Laan',
+	'Meijers', 'van Mierlo', 'Nauta', 'Nijhuis', 'Noordman', 'Oskam', 'Pannekoek', 'Pauwels', 'Reinders', 'Rijnsburger',
+	'Ruiter', 'Schoenmaker', 'Sengers', 'Smeets', 'Stam', 'Steenbergen', 'Swaans', 'Terpstra', 'Veenstra', 'Velthuis',
+	'Verburg', 'Verheul', 'Vermolen', 'Visscher', 'de Wit', 'van der Woude', 'Zandbergen', 'Zijlstra', 'Zuiderwijk', 'Zwartendijk',
 ];
 
 function bestandenIn(map) {
@@ -132,7 +146,10 @@ for (const [index, namen] of [...groepen.values()].sort((a, b) => [...a][0].loca
 	let vervanger;
 	do {
 		const volgnummer = volgendPseudoniem++;
-		vervanger = `${voornamen[volgnummer % voornamen.length]} ${achternamen[Math.floor(volgnummer / voornamen.length) % achternamen.length]}`;
+		if (volgnummer >= achternamen.length) {
+			throw new Error('Te weinig pseudoniemen voor deze demo.');
+		}
+		vervanger = `${voornamen[volgnummer % voornamen.length]} ${achternamen[volgnummer]}`;
 	} while ([...identiteitenPerNaam.keys()].some((naam) => bevatNaam(vervanger, naam)));
 	for (const naam of namen) vervangerPerNaam.set(naam, vervanger);
 }
