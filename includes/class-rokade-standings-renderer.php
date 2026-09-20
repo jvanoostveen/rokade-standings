@@ -22,8 +22,10 @@ class Schaken_Standen_Renderer {
 	}
 
 	public function register_assets() {
-		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), SCHAKEN_STANDEN_VERSION);
-		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), SCHAKEN_STANDEN_VERSION, true);
+		$style_version = filemtime(SCHAKEN_STANDEN_DIR . 'assets/rokade-standings.css');
+		$script_version = filemtime(SCHAKEN_STANDEN_DIR . 'assets/rokade-standings.js');
+		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), $style_version);
+		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), $script_version, true);
 		// The same strings the server-rendered markup uses, so both stay in step once translated.
 		wp_localize_script('schaken-standen', 'schakenStandenL10n', array(
 			'ranking' => __('Ranglijst', 'schaken-standen'),

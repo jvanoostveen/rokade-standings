@@ -42,6 +42,7 @@
 
   function showCompetition(root, content, file, compact) {
     content.classList.toggle('is-compact-view', Boolean(compact));
+    content.classList.remove('is-detail-view');
     var endpoint = endpointFor(root, file);
     if (root.dataset.mode === 'iframe') {
       var frame = document.createElement('iframe');
@@ -210,6 +211,7 @@
         // The detail page has its own table shape; keeping the cross table's
         // compact columns would squeeze it.
         linkContent.classList.remove('is-compact-view');
+        linkContent.classList.add('is-detail-view');
         loadInline(linkContent, linkUrl.toString(), true);
       }
       return;

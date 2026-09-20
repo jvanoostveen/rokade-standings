@@ -13,10 +13,15 @@ import { dirname, join, normalize, resolve } from 'node:path';
 const demoDir = resolve(process.argv[2] || 'demo');
 
 const voornamen = [
-	'Anne', 'Bram', 'Carlijn', 'Daan', 'Eline', 'Fleur', 'Gijs', 'Hanne', 'Iris', 'Jelle',
-	'Kiki', 'Lars', 'Maaike', 'Niels', 'Olivier', 'Pien', 'Quinten', 'Renske', 'Sander', 'Tessa',
-	'Udo', 'Vera', 'Wouter', 'Xandra', 'Yvonne', 'Zeger', 'Anouk', 'Bas', 'Cato', 'Diederik',
-	'Elise', 'Floris', 'Gwen', 'Hugo', 'Ilse', 'Joris', 'Karin', 'Lieke', 'Maarten', 'Noor',
+	'Aafke', 'Abel', 'Adriaan', 'Aisha', 'Albert', 'Aletta', 'Amira', 'Anouk', 'Arjen', 'Auke',
+	'Bente', 'Berend', 'Bregje', 'Casper', 'Celeste', 'Coen', 'Daan', 'Diede', 'Dirk', 'Eefje',
+	'Elias', 'Elise', 'Esmee', 'Eva', 'Feline', 'Femke', 'Floris', 'Frank', 'Freek', 'Gijs',
+	'Hanne', 'Hein', 'Helena', 'Hugo', 'Ilse', 'Imke', 'Iris', 'Ivo', 'Jasmijn', 'Jelle',
+	'Jip', 'Jochem', 'Joris', 'Juno', 'Karin', 'Kees', 'Kiki', 'Koen', 'Lara', 'Lars',
+	'Lieke', 'Linde', 'Loes', 'Lotte', 'Maaike', 'Maarten', 'Mees', 'Mila', 'Niels', 'Nienke',
+	'Noor', 'Olivier', 'Pien', 'Pim', 'Quinten', 'Renske', 'Roos', 'Ruben', 'Saar', 'Sander',
+	'Sanne', 'Sem', 'Sterre', 'Teun', 'Tessa', 'Thijs', 'Tobias', 'Udo', 'Vera', 'Vic',
+	'Willem', 'Wouter', 'Xander', 'Yael', 'Yara', 'Yvonne', 'Zeger', 'Zoe',
 ];
 const achternamen = [
 	'Bakker', 'de Boer', 'Bos', 'Brouwer', 'de Bruin', 'de Graaf', 'de Groot', 'de Haan', 'de Jong', 'de Vries',
@@ -35,7 +40,15 @@ const achternamen = [
 	'Meijers', 'van Mierlo', 'Nauta', 'Nijhuis', 'Noordman', 'Oskam', 'Pannekoek', 'Pauwels', 'Reinders', 'Rijnsburger',
 	'Ruiter', 'Schoenmaker', 'Sengers', 'Smeets', 'Stam', 'Steenbergen', 'Swaans', 'Terpstra', 'Veenstra', 'Velthuis',
 	'Verburg', 'Verheul', 'Vermolen', 'Visscher', 'de Wit', 'van der Woude', 'Zandbergen', 'Zijlstra', 'Zuiderwijk', 'Zwartendijk',
+	'Boon', 'Dekker', 'Giesen', 'Kusters', 'Lentink', 'Miedema', 'Oomens', 'Pennings', 'Rombouts', 'Schoemaker',
+	'Timmermans', 'Uiterwijk', 'Veenman', 'Westerman', 'Zilverberg',
 ];
+
+function verkorteAchternaam(achternaam) {
+	const delen = achternaam.split(' ');
+	const initiaal = delen.pop().charAt(0).toUpperCase();
+	return delen.length ? `${delen.join(' ')} ${initiaal}` : initiaal;
+}
 
 function bestandenIn(map) {
 	return readdirSync(map, { withFileTypes: true }).flatMap((item) => {
@@ -68,10 +81,6 @@ function escapeRegExp(tekst) {
 
 function naamPatroon(naam) {
 	return escapeRegExp(naam).replace(/ +/g, '(?:\\s|&nbsp;|&#160;|&#xa0;)+');
-}
-
-function bevatNaam(tekst, naam) {
-	return new RegExp(`(^|[^A-Za-zÀ-ÿ])${naamPatroon(naam)}(?=$|[^A-Za-zÀ-ÿ])`, 'i').test(tekst);
 }
 
 class Verbindingen {
@@ -115,12 +124,12 @@ function onthoudNaam(id, naam) {
 
 for (const bestand of htmlBestanden) {
 	const inhoud = readFileSync(bestand, 'latin1');
-	const linkPatroon = /<a\b[^>]*\bhref=(['"])([^'"]*C\d+P\d+\.html?)\1[^>]*>([\s\S]*?)<\/a>/gi;
+	const linkPatroon = /<a\b[^>]*\bhref=(['"])([^'"]*C\d+P-?\d+\.html?)\1[^>]*>([\s\S]*?)<\/a>/gi;
 	for (const match of inhoud.matchAll(linkPatroon)) {
 		onthoudNaam(identiteit(bestand, match[2]), platteTekst(match[3]));
 	}
 
-	const spelerId = /C\d+P\d+\.html?$/i.test(bestand) ? normalize(bestand) : null;
+	const spelerId = /C\d+P-?\d+\.html?$/i.test(bestand) ? normalize(bestand) : null;
 	for (const match of inhoud.matchAll(/Rondenlijst van\s+([^<\r\n]+)/gi)) {
 		if (spelerId) onthoudNaam(spelerId, platteTekst(match[1]));
 	}
@@ -140,40 +149,52 @@ for (const [id, namen] of namenPerIdentiteit) {
 	for (const naam of namen) groepen.get(wortel).add(naam);
 }
 
+const gesorteerdeGroepen = [...groepen.values()].sort((a, b) => [...a][0].localeCompare([...b][0], 'nl'));
+const aantallenPerVoornaam = new Map();
+for (const [index] of gesorteerdeGroepen.entries()) {
+	const voornaam = voornamen[index % voornamen.length];
+	aantallenPerVoornaam.set(voornaam, (aantallenPerVoornaam.get(voornaam) || 0) + 1);
+}
+
 const vervangerPerNaam = new Map();
+const gebruiktePseudoniemen = new Set();
 let volgendPseudoniem = 0;
-for (const [index, namen] of [...groepen.values()].sort((a, b) => [...a][0].localeCompare([...b][0], 'nl')).entries()) {
+for (const [index, namen] of gesorteerdeGroepen.entries()) {
+	const voornaam = voornamen[index % voornamen.length];
 	let vervanger;
 	do {
 		const volgnummer = volgendPseudoniem++;
 		if (volgnummer >= achternamen.length) {
 			throw new Error('Te weinig pseudoniemen voor deze demo.');
 		}
-		vervanger = `${voornamen[volgnummer % voornamen.length]} ${achternamen[volgnummer]}`;
-	} while ([...identiteitenPerNaam.keys()].some((naam) => bevatNaam(vervanger, naam)));
+		vervanger = aantallenPerVoornaam.get(voornaam) > 1
+			? `${voornaam} ${verkorteAchternaam(achternamen[volgnummer])}`
+			: voornaam;
+	} while (gebruiktePseudoniemen.has(vervanger));
+	gebruiktePseudoniemen.add(vervanger);
 	for (const naam of namen) vervangerPerNaam.set(naam, vervanger);
 }
 
 const namen = [...vervangerPerNaam.keys()].sort((a, b) => b.length - a.length);
+const placeholders = new Map(namen.map((naam, index) => [naam, `__ROKADE_PSEUDONIEM_${index}__`]));
 for (const bestand of htmlBestanden) {
 	let inhoud = readFileSync(bestand, 'latin1');
 	for (const naam of namen) {
 		const patroon = new RegExp(`(^|[^A-Za-zÀ-ÿ])(${naamPatroon(naam)})(?=$|[^A-Za-zÀ-ÿ])`, 'g');
-		inhoud = inhoud.replace(patroon, `$1${vervangerPerNaam.get(naam)}`);
+		inhoud = inhoud.replace(patroon, `$1${placeholders.get(naam)}`);
 	}
+	for (const naam of namen) inhoud = inhoud.replaceAll(placeholders.get(naam), vervangerPerNaam.get(naam));
 	writeFileSync(bestand, inhoud, 'latin1');
 }
 
-let resterend = 0;
+let placeholdersOver = 0;
 for (const bestand of htmlBestanden) {
 	const inhoud = readFileSync(bestand, 'latin1');
-	for (const naam of namen) {
-		if (bevatNaam(inhoud, naam)) resterend += 1;
-	}
+	if (inhoud.includes('__ROKADE_PSEUDONIEM_')) placeholdersOver += 1;
 }
 
-if (resterend) {
-	throw new Error(`Anonimisering onvolledig: ${resterend} bekende na(a)m(en) komt/komen nog voor.`);
+if (placeholdersOver) {
+	throw new Error(`Anonimisering onvolledig: ${placeholdersOver} tijdelijke pseudoniem(en) zijn blijven staan.`);
 }
 
 console.log(`${htmlBestanden.length} HTML-bestanden geanonimiseerd; ${vervangerPerNaam.size} namen vervangen.`);
