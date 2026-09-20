@@ -22,9 +22,10 @@ npx playwright install chromium
 cp .env.example .env   # vul WP_ADMIN_PASSWORD in
 ```
 
-De lokale export hoort onder `docs/current/standen/` en `docs/current/senioren/` te staan,
-precies zoals de hoofd-README beschrijft; het scenario verwijst naar `/standen` en
-`/senioren` in de container.
+De geanonimiseerde demo staat al onder `demo/jeugd/` en `demo/senioren/`, precies zoals de
+hoofd-README beschrijft; het scenario verwijst naar `/standen` en `/senioren` in de
+container. Daardoor zijn nieuwe schermafbeeldingen en video's altijd veilig met de
+meegeleverde gegevens op te nemen.
 
 ## Opnemen
 

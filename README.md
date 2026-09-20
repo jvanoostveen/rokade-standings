@@ -20,20 +20,20 @@ feature in één opdracht opnieuw te maken zijn.
 docker compose up -d
 ```
 
-Plaats eerst lokaal een Rokade-export onder `docs/current/standen/` (alles onder `docs/current/` staat bewust in `.gitignore`). Open daarna <http://localhost:8080>, voltooi de WordPress-installatie en activeer **Rokade Standen**. Ga naar **Instellingen → Rokade Standen** en vul dit bronpad in:
+De geanonimiseerde demo-export staat al in `demo/`, dus een clone is direct klaar voor lokaal gebruik. Open <http://localhost:8080>, voltooi de WordPress-installatie en activeer **Rokade Standen**. Ga naar **Instellingen → Rokade Standen** en vul dit bronpad in:
 
 ```
 /standen | Jeugd
 ```
 
-De lokale exportmappen worden in de container read-only gemount: `docs/current/standen` als `/standen` en `docs/current/senioren` als `/senioren`. Een export als `docs/current/standen/2026-2027/…` is in de container dus beschikbaar als `/standen/2026-2027/…`. Met twee bronnen wordt het veld:
+De lokale demo-exportmappen worden in de container read-only gemount: `demo/jeugd` als `/standen` en `demo/senioren` als `/senioren`. Een export als `demo/jeugd/2026-2027/…` is in de container dus beschikbaar als `/standen/2026-2027/…`. Met twee bronnen wordt het veld:
 
 ```
 /standen | Jeugd
 /senioren | Senioren
 ```
 
-Een extra bron toevoegen betekent een mountregel in `docker-compose.yml` en een regel in dit veld.
+Een extra bron toevoegen betekent een mountregel in `docker-compose.yml` en een regel in dit veld. De demo bevat alleen HTML en assets die de plugin nodig heeft; de spelersnamen zijn consistente pseudoniemen. Vernieuw die demo na een nieuwe export met `node tools/anonymize-demo.mjs` voordat je hem commit.
 
 Maak vervolgens bijvoorbeeld een pagina met:
 
