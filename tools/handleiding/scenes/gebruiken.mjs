@@ -181,7 +181,7 @@ export default {
 
 		const spelerLink = standen.locator('.schaken-standen__content a').first();
 		if (await spelerLink.count()) {
-			await ui.stap('Een naam of detailverwijzing wisselt alleen dit vak; de rest van de pagina blijft staan.', { wacht: 1200 });
+			await ui.stap('Een naam of detailverwijzing wisselt alleen dit vak; de teruglink brengt je weer naar de ranglijst.', { wacht: 1200 });
 			await ui.klik(spelerLink, { wacht: 2000 });
 			await ui.schermafbeelding('resultaat-06-detail', {});
 			const terug = standen.locator('.schaken-standen__back').first();

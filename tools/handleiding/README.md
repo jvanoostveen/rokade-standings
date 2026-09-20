@@ -11,6 +11,8 @@ scenario opnieuw op in plaats van beelden bij te knippen.
 
 De uitvoer komt in [`docs/handleiding/media/`](../../docs/handleiding/media); de tekst
 van de handleiding zelf staat in [`docs/handleiding/README.md`](../../docs/handleiding/README.md).
+De opname-uitvoer en de PDF zijn gegenereerd en staan daarom niet in Git; maak ze lokaal
+met de onderstaande opdrachten.
 
 ## Eenmalig klaarzetten
 

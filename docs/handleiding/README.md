@@ -313,9 +313,9 @@ hetzelfde vak.
 
 ![Het detail van een speler](media/schermafbeeldingen/resultaat-06-detail.png)
 
-Met **Terug naar ranglijst** ga je weer naar de stand.
+Met **← Terug naar ranglijst** ga je weer naar de stand. Deze onderstreepte link staat los van de tabel, zodat hij gemakkelijk te herkennen is als terugactie.
 
-![De terugknop](media/schermafbeeldingen/resultaat-07-terugknop.png)
+![De teruglink](media/schermafbeeldingen/resultaat-07-terugknop.png)
 
 ---
 

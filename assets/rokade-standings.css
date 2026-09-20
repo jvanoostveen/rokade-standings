@@ -13,7 +13,9 @@
 .schaken-standen__view:focus-visible { outline: 2px solid var(--schaken-accent); outline-offset: 2px; }
 .schaken-standen__view.is-active { z-index: 1; margin-bottom: -2px; border-color: var(--schaken-accent); border-bottom: 2px solid var(--schaken-surface); background: var(--schaken-surface); color: var(--schaken-accent); }
 .schaken-standen__content[aria-busy="true"] { min-height: 5rem; opacity: .55; }
-.schaken-standen__back { margin-bottom: 1rem; border: 1px solid currentColor; border-radius: .25rem; background: transparent; color: inherit; padding: .45rem .7rem; font: inherit; cursor: pointer; }
+.schaken-standen__back { margin: 1.25rem 0 1.5rem; border: 0; background: transparent; color: var(--schaken-accent); padding: 0; font: inherit; cursor: pointer; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.schaken-standen__back::before { content: "←"; margin-inline-end: .35em; }
+.schaken-standen__back:focus-visible { outline: 2px solid var(--schaken-accent); outline-offset: 3px; }
 .schaken-standen__embedded { overflow-x: auto; color: inherit; font-family: inherit; }
 .schaken-standen__embedded table { width: 100% !important; max-width: 100%; border-collapse: collapse; font: inherit !important; color: inherit !important; background: transparent !important; }
 .schaken-standen__embedded th, .schaken-standen__embedded td { padding: .5rem .45rem; border-color: currentColor; vertical-align: middle; }

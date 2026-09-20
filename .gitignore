@@ -12,3 +12,8 @@
 # Lokale inloggegevens voor het handleidingscenario.
 /tools/handleiding/.env
 /tools/handleiding/node_modules/
+
+# Opname-uitvoer van het handleidingsscenario. Bouw deze lokaal met de scripts
+# in tools/handleiding; bron, scripts en handleidingstekst blijven wel in Git.
+/docs/handleiding/Handleiding-Rokade-Standen.pdf
+/docs/handleiding/media/

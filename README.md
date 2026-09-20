@@ -54,7 +54,7 @@ Handige varianten:
 
 Naast de shortcode is er in de blok-editor het blok **Rokade standen**. Selecteer het blok en kies in de zijbalk de bron, het seizoen, de competitie en de weergave (inline of de oorspronkelijke Rokade-weergave). De bronkeuze verschijnt zodra er meer dan één bronpad is ingesteld; seizoen en competitie horen bij de gekozen bron en worden leeggemaakt zodra ze daar niet bestaan. De opties worden samengesteld uit de actuele standenindex. Na het vernieuwen van die index zijn nieuwe seizoenen en competities ook in het blok beschikbaar.
 
-Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig ingelezen en krijgt de lettertypes, kleuren en links van het WordPress-thema mee. Interne naam- en detail-links wisselen alleen dit inhoudsvak en tonen een knop om terug te keren naar de ranglijst. De knoppen blijven altijd WordPress-native. Met `modus="iframe"` wordt de oorspronkelijke HTML via een beveiligde plugin-proxy getoond; dat is nuttig wanneer de originele Rokade-layout belangrijker is.
+Standaard is de modus `inline`: het ranglijstdeel wordt door de plugin veilig ingelezen en krijgt de lettertypes, kleuren en links van het WordPress-thema mee. Interne naam- en detail-links wisselen alleen dit inhoudsvak en tonen een onderstreepte teruglink met een pijl naar de ranglijst. De knoppen blijven altijd WordPress-native. Met `modus="iframe"` wordt de oorspronkelijke HTML via een beveiligde plugin-proxy getoond; dat is nuttig wanneer de originele Rokade-layout belangrijker is.
 
 Wanneer de export ze bevat, verschijnen bij iedere groep ook de tabbladen **Kruistabel** en **Scoretabel**. Samen met **Ranglijst** vormen ze een tabbladbalk die visueel aansluit op de tabel eronder; de gekozen weergave laadt in-place.
 
