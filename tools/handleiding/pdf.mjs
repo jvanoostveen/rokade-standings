@@ -114,6 +114,8 @@ const STIJL = `
 	.inhoud ol ol { padding-left: 14pt; margin: 2pt 0 8pt; }
 	.inhoud ol ol li { font-weight: 400; color: var(--grijs); margin-bottom: 1pt; }
 	h2 { break-before: auto; }
+	/* Deel 2 is een zelfstandig hoofdstuk in de gedrukte handleiding. */
+	h2#deel-2-standen-op-een-pagina-zetten { break-before: page; }
 `;
 
 function inhoudsopgave(tokens) {
