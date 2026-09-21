@@ -36,12 +36,7 @@ function schaken_standen() {
 
 function schaken_standen_activate() {
 	if (!get_option('schaken_standen_settings')) {
-		add_option('schaken_standen_settings', array(
-			'sources' => '',
-			'cache_minutes' => 15,
-			'internal_group_order' => "Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon",
-			'block_button_templates' => "doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}",
-		));
+		add_option('schaken_standen_settings', Schaken_Standen_Index::defaults());
 	}
 
 	schaken_standen_schedule_refresh();

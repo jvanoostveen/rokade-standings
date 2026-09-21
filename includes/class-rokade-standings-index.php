@@ -8,6 +8,16 @@ if (!defined('ABSPATH')) {
 class Schaken_Standen_Index {
 	const CACHE_KEY = 'schaken_standen_index_v3';
 
+	/** The option shape a fresh install starts with; settings() fills gaps with it. */
+	public static function defaults() {
+		return array(
+			'sources' => '',
+			'cache_minutes' => 15,
+			'internal_group_order' => "Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon",
+			'block_button_templates' => "doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}",
+		);
+	}
+
 	public function settings() {
 		$settings = get_option('schaken_standen_settings', array());
 		if (!is_array($settings)) {
@@ -22,12 +32,7 @@ class Schaken_Standen_Index {
 		}
 		unset($settings['source_path']);
 
-		return wp_parse_args($settings, array(
-			'sources' => '',
-			'cache_minutes' => 15,
-			'internal_group_order' => "Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon",
-			'block_button_templates' => "doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}",
-		));
+		return wp_parse_args($settings, self::defaults());
 	}
 
 	/**
