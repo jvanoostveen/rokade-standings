@@ -158,7 +158,12 @@ class Schaken_Standen_Index {
 	}
 
 	private function store($index) {
-		set_transient(self::CACHE_KEY, $index, MINUTE_IN_SECONDS * $this->cache_minutes());
+		// The cron rescans every cache_minutes. With an equal lifetime the
+		// transient expired at the very moment the cron came due, so the visitor
+		// whose request triggered WP-Cron rescanned anyway and the warm-up never
+		// helped anyone. Let the entry outlive one missed cron run; the scheduled
+		// refresh keeps the data at most cache_minutes old whenever it does run.
+		set_transient(self::CACHE_KEY, $index, 2 * MINUTE_IN_SECONDS * $this->cache_minutes());
 	}
 
 	private function make_competition($root, $season, $file) {

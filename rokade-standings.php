@@ -74,6 +74,16 @@ add_action('plugins_loaded', function () {
 	schaken_standen()->register();
 });
 
+// The activation hook is the only place that schedules the refresh, and it does
+// not run when the plugin files are replaced in place or when a cron plugin
+// prunes the event. Put it back on the next request instead of silently
+// falling back to visitors rescanning the directory.
+add_action('init', function () {
+	if (!wp_next_scheduled('schaken_standen_refresh_index')) {
+		schaken_standen_schedule_refresh();
+	}
+});
+
 add_action('schaken_standen_refresh_index', function () {
 	$index = new Schaken_Standen_Index();
 	$index->refresh();
