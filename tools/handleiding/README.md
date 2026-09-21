@@ -62,7 +62,7 @@ Het scenario zet de uitgangsstaat zelf klaar via WP-CLI (de `wpcli`-service in
 `docker-compose.yml`), zodat een herhaling hetzelfde beeld geeft:
 
 - de plugin wordt geactiveerd en de beheertaal op `WP_LOCALE` gezet;
-- `schaken_standen_settings` wordt overschreven — deel 1 begint zonder bronpad, deel 2
+- `rokade_standings_settings` wordt overschreven — deel 1 begint zonder bronpad, deel 2
   met de bronnen `/standen | Jeugd` en `/senioren | Senioren`;
 - de standenindex (transient) wordt gewist;
 - een eerdere voorbeeldpagina **Standen jeugd** en losse auto-concepten worden verwijderd.

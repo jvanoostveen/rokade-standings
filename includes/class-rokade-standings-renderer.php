@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-class Schaken_Standen_Renderer {
+class Rokade_Standings_Renderer {
 	private $index;
 	private $group_rules = null;
 	private $block_button_rules = null;
@@ -22,23 +22,23 @@ class Schaken_Standen_Renderer {
 	}
 
 	public function register_assets() {
-		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), $this->asset_version('rokade-standings.css'));
-		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), $this->asset_version('rokade-standings.js'), true);
+		wp_register_style('rokade-standings', ROKADE_STANDINGS_URL . 'assets/rokade-standings.css', array(), $this->asset_version('rokade-standings.css'));
+		wp_register_script('rokade-standings', ROKADE_STANDINGS_URL . 'assets/rokade-standings.js', array(), $this->asset_version('rokade-standings.js'), true);
 		// The same strings the server-rendered markup uses, so both stay in step once translated.
-		wp_localize_script('schaken-standen', 'schakenStandenL10n', array(
+		wp_localize_script('rokade-standings', 'rokadeStandingsL10n', array(
 			// The same base the server-rendered links use, so a fetch never drags
 			// the current page's own query string (preview, search) along.
 			'endpoint' => home_url('/'),
-			'ranking' => __('Ranglijst', 'schaken-standen'),
-			'cross' => __('Kruistabel', 'schaken-standen'),
-			'score' => __('Scoretabel', 'schaken-standen'),
-			'back' => __('Terug naar ranglijst', 'schaken-standen'),
-			'frameTitle' => __('Standen', 'schaken-standen'),
-			'loadError' => __('Dit standenbestand kan niet worden geladen.', 'schaken-standen'),
+			'ranking' => __('Ranglijst', 'rokade-standings'),
+			'cross' => __('Kruistabel', 'rokade-standings'),
+			'score' => __('Scoretabel', 'rokade-standings'),
+			'back' => __('Terug naar ranglijst', 'rokade-standings'),
+			'frameTitle' => __('Standen', 'rokade-standings'),
+			'loadError' => __('Dit standenbestand kan niet worden geladen.', 'rokade-standings'),
 		));
 		wp_register_script(
-			'schaken-standen-block-editor',
-			SCHAKEN_STANDEN_URL . 'assets/rokade-standings-block.js',
+			'rokade-standings-block-editor',
+			ROKADE_STANDINGS_URL . 'assets/rokade-standings-block.js',
 			array('wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render'),
 			$this->asset_version('rokade-standings-block.js'),
 			true
@@ -51,8 +51,8 @@ class Schaken_Standen_Renderer {
 	 * a browser would otherwise keep an outdated editor script.
 	 */
 	private function asset_version($file) {
-		$mtime = @filemtime(SCHAKEN_STANDEN_DIR . 'assets/' . $file);
-		return $mtime ? (string) $mtime : SCHAKEN_STANDEN_VERSION;
+		$mtime = @filemtime(ROKADE_STANDINGS_DIR . 'assets/' . $file);
+		return $mtime ? (string) $mtime : ROKADE_STANDINGS_VERSION;
 	}
 
 	/** Registers the dynamic Gutenberg equivalent of the [rokade] shortcode. */
@@ -61,16 +61,31 @@ class Schaken_Standen_Renderer {
 			return;
 		}
 
-		// Everything but the callback lives in blocks/rokade/block.json, so the
+		// Everything but the callback lives in blocks/standings/block.json, so the
 		// editor can read the same definition the server registers.
-		register_block_type(SCHAKEN_STANDEN_DIR . 'blocks/rokade', array(
+		$block = register_block_type(ROKADE_STANDINGS_DIR . 'blocks/standings', array(
 			'render_callback' => array($this, 'render_block'),
 		));
+
+		// Pages saved before the rename still contain the block under its earlier
+		// name. Keep rendering and editing those instead of showing a missing
+		// block; the editor script registers the same alias with inserter: false.
+		if ($block) {
+			register_block_type('schaken-standen/rokade', array(
+				'title' => $block->title,
+				'attributes' => $block->attributes,
+				'supports' => array_merge((array) $block->supports, array('inserter' => false)),
+				'editor_script_handles' => $block->editor_script_handles,
+				'style_handles' => $block->style_handles,
+				'editor_style_handles' => $block->editor_style_handles,
+				'render_callback' => array($this, 'render_block'),
+			));
+		}
 	}
 
 	/** Loads index-derived dropdown choices only in the block editor. */
 	public function localize_block_options() {
-		wp_localize_script('schaken-standen-block-editor', 'schakenStandenBlock', $this->block_options());
+		wp_localize_script('rokade-standings-block-editor', 'rokadeStandingsBlock', $this->block_options());
 	}
 
 	/** Supplies editor dropdown options from the current, cached standings index. */
@@ -98,11 +113,11 @@ class Schaken_Standen_Renderer {
 		return array(
 			'sources' => $sources,
 			'labels' => array(
-				'defaultSource' => __('Eerste bron', 'schaken-standen'),
-				'latestSeason' => __('Meest recente seizoen', 'schaken-standen'),
-				'allCategories' => __('Alle competities', 'schaken-standen'),
-				'inline' => __('Inline (in de pagina)', 'schaken-standen'),
-				'iframe' => __('Oorspronkelijke Rokade-weergave', 'schaken-standen'),
+				'defaultSource' => __('Eerste bron', 'rokade-standings'),
+				'latestSeason' => __('Meest recente seizoen', 'rokade-standings'),
+				'allCategories' => __('Alle competities', 'rokade-standings'),
+				'inline' => __('Inline (in de pagina)', 'rokade-standings'),
+				'iframe' => __('Oorspronkelijke Rokade-weergave', 'rokade-standings'),
 			),
 		);
 	}
@@ -124,7 +139,7 @@ class Schaken_Standen_Renderer {
 
 		if (!$season) {
 			return current_user_can('manage_options')
-				? '<p class="schaken-standen__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel de bronpaden in onder Instellingen → Rokade Standen.', 'schaken-standen') . '</p>'
+				? '<p class="rokade-standings__notice">' . esc_html__('Er zijn geen leesbare standen gevonden. Stel de bronpaden in onder Instellingen → Rokade Standen.', 'rokade-standings') . '</p>'
 				: '';
 		}
 
@@ -139,8 +154,8 @@ class Schaken_Standen_Renderer {
 			return '';
 		}
 
-		wp_enqueue_style('schaken-standen');
-		wp_enqueue_script('schaken-standen');
+		wp_enqueue_style('rokade-standings');
+		wp_enqueue_script('rokade-standings');
 		return $this->render($source, $season, $competitions, 'iframe' === $attributes['modus'], empty($attributes['categorie']));
 	}
 
@@ -197,39 +212,39 @@ class Schaken_Standen_Renderer {
 
 		$first_category = array_key_first($categories);
 		$first_item = $categories[$first_category]['periods'][0]['items'][0];
-		$instance = 'schaken-standen-' . wp_generate_uuid4();
+		$instance = 'rokade-standings-' . wp_generate_uuid4();
 
 		ob_start();
 		?>
-		<section class="schaken-standen" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-source="<?php echo esc_attr($source); ?>" data-season="<?php echo esc_attr($season); ?>">
+		<section class="rokade-standings" id="<?php echo esc_attr($instance); ?>" data-mode="<?php echo $iframe ? 'iframe' : 'inline'; ?>" data-source="<?php echo esc_attr($source); ?>" data-season="<?php echo esc_attr($season); ?>">
 			<?php if ($show_categories) : ?>
-				<div class="schaken-standen__categories" role="group" aria-label="<?php esc_attr_e('Soort competitie', 'schaken-standen'); ?>">
+				<div class="rokade-standings__categories" role="group" aria-label="<?php esc_attr_e('Soort competitie', 'rokade-standings'); ?>">
 					<?php foreach ($categories as $key => $category) : ?>
-						<button type="button" class="schaken-standen__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>" aria-pressed="<?php echo $key === $first_category ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($instance . '-' . $key); ?>"><?php echo esc_html($category['label']); ?></button>
+						<button type="button" class="rokade-standings__category<?php echo $key === $first_category ? ' is-active' : ''; ?>" data-category="<?php echo esc_attr($key); ?>" aria-pressed="<?php echo $key === $first_category ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($instance . '-' . $key); ?>"><?php echo esc_html($category['label']); ?></button>
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>
 			<?php foreach ($categories as $key => $category) : ?>
 				<?php $content_id = $instance . '-' . $key . '-content'; ?>
-				<div class="schaken-standen__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" id="<?php echo esc_attr($instance . '-' . $key); ?>" data-category-panel="<?php echo esc_attr($key); ?>">
+				<div class="rokade-standings__group<?php echo $key === $first_category ? ' is-active' : ''; ?>" id="<?php echo esc_attr($instance . '-' . $key); ?>" data-category-panel="<?php echo esc_attr($key); ?>">
 					<?php $tab_number = 0; ?>
 					<?php foreach ($category['periods'] as $period) : ?>
-						<section class="schaken-standen__period">
-							<?php if ($period['label']) : ?><h3 class="schaken-standen__period-title"><?php echo esc_html($period['label']); ?></h3><?php endif; ?>
-							<div class="schaken-standen__tabs" role="group" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
+						<section class="rokade-standings__period">
+							<?php if ($period['label']) : ?><h3 class="rokade-standings__period-title"><?php echo esc_html($period['label']); ?></h3><?php endif; ?>
+							<div class="rokade-standings__tabs" role="group" aria-label="<?php echo esc_attr($period['label'] ? $period['label'] : $category['label']); ?>">
 								<?php foreach ($period['items'] as $competition) : ?>
 									<?php $is_active = 0 === $tab_number++; ?>
-									<button type="button" class="schaken-standen__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-competition="<?php echo esc_attr($competition['url_key']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
+									<button type="button" class="rokade-standings__tab<?php echo $is_active ? ' is-active' : ''; ?>" data-file="<?php echo esc_attr($competition['ranking_file']); ?>" data-competition="<?php echo esc_attr($competition['url_key']); ?>" data-cross-file="<?php echo esc_attr($competition['cross_file']); ?>" data-score-file="<?php echo esc_attr($competition['score_file']); ?>" aria-pressed="<?php echo $is_active ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr($content_id); ?>"><?php echo esc_html(isset($competition['display_title']) ? $competition['display_title'] : $competition['title']); ?></button>
 								<?php endforeach; ?>
 							</div>
 						</section>
 					<?php endforeach; ?>
-					<div class="schaken-standen__views" role="group" aria-label="<?php esc_attr_e('Weergave', 'schaken-standen'); ?>">
+					<div class="rokade-standings__views" role="group" aria-label="<?php esc_attr_e('Weergave', 'rokade-standings'); ?>">
 						<?php if ($key === $first_category) : ?>
 							<?php echo $this->render_view_buttons($first_item, $content_id); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
 					</div>
-					<div class="schaken-standen__content" id="<?php echo esc_attr($content_id); ?>" role="region" aria-label="<?php esc_attr_e('Standen', 'schaken-standen'); ?>" aria-live="polite">
+					<div class="rokade-standings__content" id="<?php echo esc_attr($content_id); ?>" role="region" aria-label="<?php esc_attr_e('Standen', 'rokade-standings'); ?>" aria-live="polite">
 						<?php if ($key === $first_category) : ?>
 							<?php echo $this->render_file($source, $season, $first_item['ranking_file'], $iframe); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
@@ -333,7 +348,7 @@ class Schaken_Standen_Renderer {
 		if (preg_match('/\\b(voorjaar|najaar)\\s+(\\d{4})\\b/ui', $title, $matches)) {
 			$season_part = strtolower($matches[1]);
 			$year = (int) $matches[2];
-			$label = ('voorjaar' === $season_part ? __('Voorjaar', 'schaken-standen') : __('Najaar', 'schaken-standen')) . ' ' . $year;
+			$label = ('voorjaar' === $season_part ? __('Voorjaar', 'rokade-standings') : __('Najaar', 'rokade-standings')) . ' ' . $year;
 			return array(
 				'key' => $season_part . '-' . $year,
 				'label' => $label,
@@ -347,7 +362,7 @@ class Schaken_Standen_Renderer {
 		}
 		return array(
 			'key' => 'season-' . sanitize_key($season),
-			'label' => sprintf(__('Seizoen %s', 'schaken-standen'), $season),
+			'label' => sprintf(__('Seizoen %s', 'rokade-standings'), $season),
 			'sort' => $sort,
 		);
 	}
@@ -400,9 +415,9 @@ class Schaken_Standen_Renderer {
 
 	private function render_view_buttons($competition, $content_id) {
 		$views = array(
-			array('label' => __('Ranglijst', 'schaken-standen'), 'file' => $competition['ranking_file'], 'compact' => false),
-			array('label' => __('Kruistabel', 'schaken-standen'), 'file' => $competition['cross_file'], 'compact' => true),
-			array('label' => __('Scoretabel', 'schaken-standen'), 'file' => $competition['score_file'], 'compact' => true),
+			array('label' => __('Ranglijst', 'rokade-standings'), 'file' => $competition['ranking_file'], 'compact' => false),
+			array('label' => __('Kruistabel', 'rokade-standings'), 'file' => $competition['cross_file'], 'compact' => true),
+			array('label' => __('Scoretabel', 'rokade-standings'), 'file' => $competition['score_file'], 'compact' => true),
 		);
 		$output = '';
 		foreach ($views as $view) {
@@ -410,7 +425,7 @@ class Schaken_Standen_Renderer {
 				continue;
 			}
 			$active = $view['file'] === $competition['ranking_file'];
-			$output .= '<button type="button" class="schaken-standen__view' . ($active ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '" data-compact="' . ($view['compact'] ? 'true' : 'false') . '" aria-pressed="' . ($active ? 'true' : 'false') . '" aria-controls="' . esc_attr($content_id) . '">' . esc_html($view['label']) . '</button>';
+			$output .= '<button type="button" class="rokade-standings__view' . ($active ? ' is-active' : '') . '" data-file="' . esc_attr($view['file']) . '" data-compact="' . ($view['compact'] ? 'true' : 'false') . '" aria-pressed="' . ($active ? 'true' : 'false') . '" aria-controls="' . esc_attr($content_id) . '">' . esc_html($view['label']) . '</button>';
 		}
 		return $output;
 	}
@@ -418,32 +433,32 @@ class Schaken_Standen_Renderer {
 	private function render_file($source, $season, $relative_file, $iframe) {
 		$url = $this->file_url($source, $season, $relative_file);
 		if ($iframe) {
-			return '<iframe class="schaken-standen__frame" title="' . esc_attr__('Standen', 'schaken-standen') . '" src="' . esc_url($url) . '" loading="lazy" sandbox="allow-same-origin"></iframe>';
+			return '<iframe class="rokade-standings__frame" title="' . esc_attr__('Standen', 'rokade-standings') . '" src="' . esc_url($url) . '" loading="lazy" sandbox="allow-same-origin"></iframe>';
 		}
 
 		$contents = $this->get_file_contents($source, $season, $relative_file);
 		if (null === $contents) {
-			return '<p class="schaken-standen__notice">' . esc_html__('Dit standenbestand kan niet worden gelezen.', 'schaken-standen') . '</p>';
+			return '<p class="rokade-standings__notice">' . esc_html__('Dit standenbestand kan niet worden gelezen.', 'rokade-standings') . '</p>';
 		}
 
-		return '<div class="schaken-standen__embedded">' . $this->sanitize_and_rewrite_html($source, $season, dirname($relative_file), $contents) . '</div>';
+		return '<div class="rokade-standings__embedded">' . $this->sanitize_and_rewrite_html($source, $season, dirname($relative_file), $contents) . '</div>';
 	}
 
 	public function serve_source_file() {
-		if (!isset($_GET['schaken_standen_file'], $_GET['schaken_standen_season'])) {
+		if (!isset($_GET['rokade_standings_file'], $_GET['rokade_standings_season'])) {
 			return;
 		}
 		// Pages rendered before the plugin knew about multiple sources link
 		// without one; those installs only ever had a single source anyway.
-		$requested_source = isset($_GET['schaken_standen_source']) ? wp_unslash($_GET['schaken_standen_source']) : '';
+		$requested_source = isset($_GET['rokade_standings_source']) ? wp_unslash($_GET['rokade_standings_source']) : '';
 		$source = is_scalar($requested_source) && '' !== $requested_source
 			? sanitize_title((string) $requested_source)
 			: $this->index->default_source_id();
 		// A crafted query can hand over arrays (file[]=...); those are never a
 		// valid request, so answer 404 rather than lean on how the sanitizers
 		// happen to treat non-strings.
-		$season = wp_unslash($_GET['schaken_standen_season']);
-		$file = wp_unslash($_GET['schaken_standen_file']);
+		$season = wp_unslash($_GET['rokade_standings_season']);
+		$file = wp_unslash($_GET['rokade_standings_file']);
 		if (!is_scalar($season) || !is_scalar($file)) {
 			status_header(404);
 			exit;
@@ -465,9 +480,9 @@ class Schaken_Standen_Renderer {
 
 	private function file_url($source, $season, $file) {
 		return add_query_arg(array(
-			'schaken_standen_source' => $source,
-			'schaken_standen_season' => $season,
-			'schaken_standen_file' => $file,
+			'rokade_standings_source' => $source,
+			'rokade_standings_season' => $season,
+			'rokade_standings_file' => $file,
 		), home_url('/'));
 	}
 

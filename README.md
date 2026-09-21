@@ -78,6 +78,15 @@ npm run package
 
 Het pakket verschijnt als `dist/rokade-standings-<versie>.zip`. Het bevat alleen de plugincode, assets en README; lokale exportbestanden, thema's, Docker-bestanden en ontwikkelbestanden blijven buiten het archief.
 
+## Upgraden vanaf 0.1.x
+
+Vanaf 0.2.0 heet alles in de plugin intern `rokade-standings`: de klassen, het tekstdomein, de CSS-klassen (`rokade-standings__…`), de optie `rokade_standings_settings`, het blok `rokade-standings/standings` en de queryparameters van het bestandsendpoint. Een bestaande installatie hoeft daar niets voor te doen:
+
+- De instellingen worden bij het eerste bezoek aan het beheer automatisch overgezet; tot die tijd leest de voorkant de oude optie.
+- Pagina's die het blok nog onder de oude naam `schaken-standen/rokade` bevatten, blijven werken en bewerkbaar. Die naam is als verborgen alias geregistreerd; nieuwe blokken krijgen de nieuwe naam.
+- Eigen CSS in het thema dat op `.schaken-standen…`-klassen mikte, moet naar `.rokade-standings…` worden omgezet.
+- Deep links met `rokade_bron`, `rokade_seizoen`, `rokade_categorie` en `rokade_competitie` zijn ongewijzigd. De shortcode blijft `[rokade]`.
+
 ## Productiebron
 
 Kopieer iedere exportmap naar een leesbare locatie buiten de plugin, bijvoorbeeld:

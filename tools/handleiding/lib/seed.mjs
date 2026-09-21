@@ -14,8 +14,8 @@ export const INSTELLINGEN = {
 };
 
 function zetInstellingen(waarden) {
-	wp(['option', 'update', 'schaken_standen_settings', JSON.stringify(waarden), '--format=json']);
-	wpOk(['transient', 'delete', 'schaken_standen_index_v3']);
+	wp(['option', 'update', 'rokade_standings_settings', JSON.stringify(waarden), '--format=json']);
+	wpOk(['transient', 'delete', 'rokade_standings_index']);
 }
 
 /** Gemeenschappelijke staat: de plugin actief en de admin in het Nederlands. */

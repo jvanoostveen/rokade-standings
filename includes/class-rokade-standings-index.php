@@ -5,8 +5,10 @@ if (!defined('ABSPATH')) {
 }
 
 /** Reads the small Index.htm files once and caches their metadata in a transient. */
-class Schaken_Standen_Index {
-	const CACHE_KEY = 'schaken_standen_index_v3';
+class Rokade_Standings_Index {
+	const CACHE_KEY = 'rokade_standings_index';
+	/** Option name from before the plugin's internals were renamed to rokade-standings. */
+	const LEGACY_OPTION = 'schaken_standen_settings';
 
 	/** The option shape a fresh install starts with; settings() fills gaps with it. */
 	public static function defaults() {
@@ -19,7 +21,12 @@ class Schaken_Standen_Index {
 	}
 
 	public function settings() {
-		$settings = get_option('schaken_standen_settings', array());
+		$settings = get_option('rokade_standings_settings', null);
+		if (!is_array($settings)) {
+			// Until an admin request has run the upgrade, the front end must keep
+			// reading the option written under the earlier name.
+			$settings = get_option(self::LEGACY_OPTION, array());
+		}
 		if (!is_array($settings)) {
 			$settings = array();
 		}
@@ -28,7 +35,7 @@ class Schaken_Standen_Index {
 		// the first labelled source on read; the next save writes the new shape.
 		if (!isset($settings['sources']) && isset($settings['source_path'])) {
 			$legacy = untrailingslashit(trim((string) $settings['source_path']));
-			$settings['sources'] = '' === $legacy ? '' : $legacy . ' | ' . __('Standen', 'schaken-standen');
+			$settings['sources'] = '' === $legacy ? '' : $legacy . ' | ' . __('Standen', 'rokade-standings');
 		}
 		unset($settings['source_path']);
 
@@ -249,9 +256,9 @@ class Schaken_Standen_Index {
 
 	private function category_label($category) {
 		$labels = array(
-			'interne-competitie' => __('Interne competitie', 'schaken-standen'),
-			'doorgeefschaak' => __('Doorgeefschaak', 'schaken-standen'),
-			'snelschaken' => __('Snelschaken', 'schaken-standen'),
+			'interne-competitie' => __('Interne competitie', 'rokade-standings'),
+			'doorgeefschaak' => __('Doorgeefschaak', 'rokade-standings'),
+			'snelschaken' => __('Snelschaken', 'rokade-standings'),
 		);
 		return isset($labels[$category]) ? $labels[$category] : $category;
 	}

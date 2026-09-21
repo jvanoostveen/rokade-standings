@@ -100,7 +100,7 @@ export async function keuzeOpties(page, label) {
 export async function wachtOpVoorbeeld(page) {
 	const frame = page.frame({ name: 'editor-canvas' }) || page.mainFrame();
 	await frame.waitForFunction(() => {
-		const voorbeeld = document.querySelector('.schaken-standen-block-preview');
+		const voorbeeld = document.querySelector('.rokade-standings-block-preview');
 		if (!voorbeeld) return false;
 		if (voorbeeld.querySelector('.components-spinner')) return false;
 		return voorbeeld.textContent.trim().length > 0 || Boolean(voorbeeld.querySelector('iframe'));

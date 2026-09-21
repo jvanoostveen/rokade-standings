@@ -78,7 +78,7 @@ await ui.schermafbeelding('gebruiken-13-iets', { locator: paneel, maxHoogte: 330
   bewerkcanvas van Gutenberg. Zonder de `window.top === window.self`-grens legt het doek daar
   een wit vlak dat niemand meer weghaalt: lege canvas in video én schermafbeeldingen.
 - **Wachten op de voorvertoning hoort in het canvas-frame.** In het hoofddocument bestaat
-  `.schaken-standen-block-preview` niet, waardoor elke wachtactie 30 seconden uitliep en de
+  `.rokade-standings-block-preview` niet, waardoor elke wachtactie 30 seconden uitliep en de
   video negen minuten werd.
 - **Een verticale streep in een tabelcel** (`zoekterm | knopnaam`) breekt de kolom; schrijf
   `\|`.

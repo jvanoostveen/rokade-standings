@@ -138,25 +138,25 @@ export default {
 		await ui.stap('En zo ziet de pagina eruit voor bezoekers.', { wacht: 900 });
 		await ui.overgang(async () => {
 			await page.goto(url.startsWith('http') ? url : `${config.baseUrl}${url}`);
-			await page.waitForSelector('.schaken-standen', { timeout: 30000 });
+			await page.waitForSelector('.rokade-standings', { timeout: 30000 });
 			await ui.zonderBeheerbalk();
 		});
 		await ui.pauze(1600);
 		log.push({ type: 'voorbeeldpagina', url });
 		await ui.schermafbeelding('resultaat-01-pagina', {});
 
-		const standen = page.locator('.schaken-standen').first();
-		const soorten = standen.locator('.schaken-standen__categories');
+		const standen = page.locator('.rokade-standings').first();
+		const soorten = standen.locator('.rokade-standings__categories');
 		if (await soorten.count()) {
 			await ui.stap('Bovenaan staan de soorten competitie.', { wacht: 1100 });
 			await ui.schermafbeelding('resultaat-02-soorten', { locator: soorten, marge: 10 });
 		}
 
-		const tabs = standen.locator('.schaken-standen__group.is-active .schaken-standen__tab');
+		const tabs = standen.locator('.rokade-standings__group.is-active .rokade-standings__tab');
 		if (await tabs.count()) {
 			await ui.stap('Daaronder staat een knop per groep of blok.', { wacht: 1100 });
 			await ui.schermafbeelding('resultaat-03-groepen', {
-				locator: standen.locator('.schaken-standen__group.is-active .schaken-standen__tabs').first(),
+				locator: standen.locator('.rokade-standings__group.is-active .rokade-standings__tabs').first(),
 				marge: 10,
 			});
 			if ((await tabs.count()) > 1) {
@@ -164,11 +164,11 @@ export default {
 			}
 		}
 
-		const weergaven = standen.locator('.schaken-standen__group.is-active .schaken-standen__view');
+		const weergaven = standen.locator('.rokade-standings__group.is-active .rokade-standings__view');
 		if (await weergaven.count()) {
 			await ui.stap('Bevat de export een kruistabel of scoretabel, dan verschijnen die als tabbladen boven de tabel.', { wacht: 1300 });
 			await ui.schermafbeelding('resultaat-04-weergaveknoppen', {
-				locator: standen.locator('.schaken-standen__group.is-active .schaken-standen__views').first(),
+				locator: standen.locator('.rokade-standings__group.is-active .rokade-standings__views').first(),
 				marge: 10,
 			});
 			const kruis = weergaven.filter({ hasText: 'Kruistabel' }).first();
@@ -179,12 +179,12 @@ export default {
 			}
 		}
 
-		const spelerLink = standen.locator('.schaken-standen__content a').first();
+		const spelerLink = standen.locator('.rokade-standings__content a').first();
 		if (await spelerLink.count()) {
 			await ui.stap('Een naam of detailverwijzing wisselt alleen dit vak; de teruglink brengt je weer naar de ranglijst.', { wacht: 1200 });
 			await ui.klik(spelerLink, { wacht: 2000 });
 			await ui.schermafbeelding('resultaat-06-detail', {});
-			const terug = standen.locator('.schaken-standen__back').first();
+			const terug = standen.locator('.rokade-standings__back').first();
 			if (await terug.count()) {
 				await ui.schermafbeelding('resultaat-07-terugknop', { locator: terug, marge: 14 });
 				await ui.klik(terug, { wacht: 1600 });

@@ -1,12 +1,12 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "schaken-standen/rokade",
+	"name": "rokade-standings/standings",
 	"title": "Rokade standen",
 	"description": "Toon Rokade-standen met instelbare bron, seizoen, competitie en weergave.",
 	"category": "widgets",
 	"icon": "chart-bar",
-	"textdomain": "schaken-standen",
+	"textdomain": "rokade-standings",
 	"attributes": {
 		"bron": { "type": "string", "default": "" },
 		"seizoen": { "type": "string", "default": "" },
@@ -16,7 +16,7 @@
 	"supports": {
 		"html": false
 	},
-	"editorScript": "schaken-standen-block-editor",
-	"style": "schaken-standen",
-	"editorStyle": "schaken-standen"
+	"editorScript": "rokade-standings-block-editor",
+	"style": "rokade-standings",
+	"editorStyle": "rokade-standings"
 }

@@ -1,5 +1,5 @@
 (function () {
-  var l10n = window.schakenStandenL10n || {};
+  var l10n = window.rokadeStandingsL10n || {};
 
   function text(key, fallback) {
     return l10n[key] || fallback;
@@ -12,13 +12,13 @@
       return response.text();
     }).then(function (html) {
       var embedded = document.createElement('div');
-      embedded.className = 'schaken-standen__embedded';
+      embedded.className = 'rokade-standings__embedded';
       embedded.innerHTML = html;
       content.textContent = '';
       if (showBack) {
         var back = document.createElement('button');
         back.type = 'button';
-        back.className = 'schaken-standen__back';
+        back.className = 'rokade-standings__back';
         back.textContent = text('back', 'Terug naar ranglijst');
         content.appendChild(back);
       }
@@ -37,9 +37,9 @@
     endpoint.searchParams.delete('rokade_seizoen');
     endpoint.searchParams.delete('rokade_categorie');
     endpoint.searchParams.delete('rokade_competitie');
-    endpoint.searchParams.set('schaken_standen_source', root.dataset.source);
-    endpoint.searchParams.set('schaken_standen_season', root.dataset.season);
-    endpoint.searchParams.set('schaken_standen_file', file);
+    endpoint.searchParams.set('rokade_standings_source', root.dataset.source);
+    endpoint.searchParams.set('rokade_standings_season', root.dataset.season);
+    endpoint.searchParams.set('rokade_standings_file', file);
     return endpoint.toString();
   }
 
@@ -49,7 +49,7 @@
     var endpoint = endpointFor(root, file);
     if (root.dataset.mode === 'iframe') {
       var frame = document.createElement('iframe');
-      frame.className = 'schaken-standen__frame';
+      frame.className = 'rokade-standings__frame';
       frame.title = text('frameTitle', 'Standen');
       frame.loading = 'lazy';
       frame.setAttribute('sandbox', 'allow-same-origin');
@@ -62,7 +62,7 @@
   }
 
   function markActiveView(group, file) {
-    group.querySelectorAll('.schaken-standen__view').forEach(function (item) {
+    group.querySelectorAll('.rokade-standings__view').forEach(function (item) {
       var active = item.dataset.file === file;
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -70,9 +70,9 @@
   }
 
   function updateViews(group, tab, activeFile) {
-    var views = group.querySelector('.schaken-standen__views');
+    var views = group.querySelector('.rokade-standings__views');
     if (!views) return;
-    var content = group.querySelector('.schaken-standen__content');
+    var content = group.querySelector('.rokade-standings__content');
     var options = [
       { label: text('ranking', 'Ranglijst'), file: tab.dataset.file, compact: false },
       { label: text('cross', 'Kruistabel'), file: tab.dataset.crossFile, compact: true },
@@ -83,7 +83,7 @@
       if (!option.file) return;
       var view = document.createElement('button');
       view.type = 'button';
-      view.className = 'schaken-standen__view' + (option.file === activeFile ? ' is-active' : '');
+      view.className = 'rokade-standings__view' + (option.file === activeFile ? ' is-active' : '');
       view.dataset.file = option.file;
       view.dataset.compact = option.compact ? 'true' : 'false';
       view.setAttribute('aria-pressed', option.file === activeFile ? 'true' : 'false');
@@ -94,7 +94,7 @@
   }
 
   function groupFor(root, category) {
-    var groups = root.querySelectorAll('.schaken-standen__group');
+    var groups = root.querySelectorAll('.rokade-standings__group');
     for (var index = 0; index < groups.length; index++) {
       if (groups[index].dataset.categoryPanel === category) return groups[index];
     }
@@ -103,7 +103,7 @@
 
   function tabFor(group, competition) {
     if (!competition) return null;
-    var tabs = group.querySelectorAll('.schaken-standen__tab');
+    var tabs = group.querySelectorAll('.rokade-standings__tab');
     for (var index = 0; index < tabs.length; index++) {
       if (tabs[index].dataset.competition === competition) return tabs[index];
     }
@@ -121,23 +121,23 @@
     var tab = tabFor(group, requestedCompetition);
     if (!tab) {
       if (fromUrl && requestedCompetition) return null;
-      tab = group.querySelector('.schaken-standen__tab');
+      tab = group.querySelector('.rokade-standings__tab');
     }
     if (!tab) return null;
 
-    var content = group.querySelector('.schaken-standen__content');
+    var content = group.querySelector('.rokade-standings__content');
     // The server already inlined this exact view, so restoring it needs no fetch.
     var alreadyRendered = tab.classList.contains('is-active') && content && content.children.length > 0;
 
-    root.querySelectorAll('.schaken-standen__category').forEach(function (item) {
+    root.querySelectorAll('.rokade-standings__category').forEach(function (item) {
       var active = item.dataset.category === category;
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
-    root.querySelectorAll('.schaken-standen__group').forEach(function (item) {
+    root.querySelectorAll('.rokade-standings__group').forEach(function (item) {
       item.classList.toggle('is-active', item === group);
     });
-    group.querySelectorAll('.schaken-standen__tab').forEach(function (item) {
+    group.querySelectorAll('.rokade-standings__tab').forEach(function (item) {
       var active = item === tab;
       item.classList.toggle('is-active', active);
       item.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -171,10 +171,10 @@
     var category = url.searchParams.get('rokade_categorie');
     var competition = url.searchParams.get('rokade_competitie');
     if (!category && competition) {
-      var tabs = root.querySelectorAll('.schaken-standen__tab');
+      var tabs = root.querySelectorAll('.rokade-standings__tab');
       for (var index = 0; index < tabs.length && !category; index++) {
         if (tabs[index].dataset.competition === competition) {
-          category = tabs[index].closest('.schaken-standen__group').dataset.categoryPanel;
+          category = tabs[index].closest('.rokade-standings__group').dataset.categoryPanel;
         }
       }
     }
@@ -182,35 +182,35 @@
   }
 
   document.addEventListener('click', function (event) {
-    var back = event.target.closest('.schaken-standen__back');
+    var back = event.target.closest('.rokade-standings__back');
     if (back) {
-      var backRoot = back.closest('.schaken-standen');
-      var backGroup = back.closest('.schaken-standen__group');
-      var activeTab = backRoot.querySelector('.schaken-standen__group.is-active .schaken-standen__tab.is-active');
+      var backRoot = back.closest('.rokade-standings');
+      var backGroup = back.closest('.rokade-standings__group');
+      var activeTab = backRoot.querySelector('.rokade-standings__group.is-active .rokade-standings__tab.is-active');
       if (!activeTab) return;
       // This shows the ranking again, so the ranking button -- not whichever
       // table the visitor followed the link from -- is the one left pressed.
       if (backGroup) markActiveView(backGroup, activeTab.dataset.file);
-      showCompetition(backRoot, back.closest('.schaken-standen__content'), activeTab.dataset.file, false);
+      showCompetition(backRoot, back.closest('.rokade-standings__content'), activeTab.dataset.file, false);
       return;
     }
 
-    var view = event.target.closest('.schaken-standen__view');
+    var view = event.target.closest('.rokade-standings__view');
     if (view) {
-      var viewGroup = view.closest('.schaken-standen__group');
-      var viewRoot = view.closest('.schaken-standen');
+      var viewGroup = view.closest('.rokade-standings__group');
+      var viewRoot = view.closest('.rokade-standings');
       markActiveView(viewGroup, view.dataset.file);
-      showCompetition(viewRoot, viewGroup.querySelector('.schaken-standen__content'), view.dataset.file, view.dataset.compact === 'true');
+      showCompetition(viewRoot, viewGroup.querySelector('.rokade-standings__content'), view.dataset.file, view.dataset.compact === 'true');
       return;
     }
 
-    var link = event.target.closest('.schaken-standen__embedded a');
+    var link = event.target.closest('.rokade-standings__embedded a');
     if (link) {
-      var linkRoot = link.closest('.schaken-standen');
+      var linkRoot = link.closest('.rokade-standings');
       var linkUrl = new URL(link.href, window.location.href);
-      if (linkRoot && linkRoot.dataset.mode === 'inline' && linkUrl.origin === window.location.origin && linkUrl.searchParams.has('schaken_standen_file')) {
+      if (linkRoot && linkRoot.dataset.mode === 'inline' && linkUrl.origin === window.location.origin && linkUrl.searchParams.has('rokade_standings_file')) {
         event.preventDefault();
-        var linkContent = link.closest('.schaken-standen__content');
+        var linkContent = link.closest('.rokade-standings__content');
         // The detail page has its own table shape; keeping the cross table's
         // compact columns would squeeze it.
         linkContent.classList.remove('is-compact-view');
@@ -220,21 +220,21 @@
       return;
     }
 
-    var button = event.target.closest('.schaken-standen__category, .schaken-standen__tab');
+    var button = event.target.closest('.rokade-standings__category, .rokade-standings__tab');
     if (!button) return;
-    var root = button.closest('.schaken-standen');
+    var root = button.closest('.rokade-standings');
     if (!root) return;
 
-    if (button.classList.contains('schaken-standen__category')) {
+    if (button.classList.contains('rokade-standings__category')) {
       var categorySelection = activateCompetition(root, button.dataset.category, null, false);
       if (categorySelection) saveCompetitionInUrl(root, categorySelection.group, categorySelection.tab);
       return;
     }
 
-    var tabGroup = button.closest('.schaken-standen__group');
+    var tabGroup = button.closest('.rokade-standings__group');
     var tabSelection = activateCompetition(root, tabGroup.dataset.categoryPanel, button.dataset.competition, false);
     if (tabSelection) saveCompetitionInUrl(root, tabSelection.group, tabSelection.tab);
   });
 
-  document.querySelectorAll('.schaken-standen').forEach(restoreCompetitionFromUrl);
+  document.querySelectorAll('.rokade-standings').forEach(restoreCompetitionFromUrl);
 }());

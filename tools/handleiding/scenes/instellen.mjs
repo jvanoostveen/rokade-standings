@@ -2,10 +2,10 @@ import { adminUrl } from '../lib/config.mjs';
 import { INSTELLINGEN, voorInstellen } from '../lib/seed.mjs';
 
 const veld = {
-	bronnen: 'textarea[name="schaken_standen_settings[sources]"]',
-	cache: 'input[name="schaken_standen_settings[cache_minutes]"]',
-	groepen: 'textarea[name="schaken_standen_settings[internal_group_order]"]',
-	blokknoppen: 'textarea[name="schaken_standen_settings[block_button_templates]"]',
+	bronnen: 'textarea[name="rokade_standings_settings[sources]"]',
+	cache: 'input[name="rokade_standings_settings[cache_minutes]"]',
+	groepen: 'textarea[name="rokade_standings_settings[internal_group_order]"]',
+	blokknoppen: 'textarea[name="rokade_standings_settings[block_button_templates]"]',
 };
 
 function rij(page, selector) {
@@ -35,8 +35,8 @@ export default {
 		await ui.pauze(900);
 		await ui.schermafbeelding('instellen-03-menu', { locator: [menu, menu.locator('.wp-submenu')], marge: 8 });
 
-		await ui.wijs(page.locator('#menu-settings a[href="options-general.php?page=schaken-standen"]').first(), { klik: true });
-		await ui.ga(adminUrl('options-general.php?page=schaken-standen'));
+		await ui.wijs(page.locator('#menu-settings a[href="options-general.php?page=rokade-standings"]').first(), { klik: true });
+		await ui.ga(adminUrl('options-general.php?page=rokade-standings'));
 		await ui.stap('Een verse installatie kent nog geen bronpad.', { wacht: 1400 });
 		await ui.schermafbeelding('instellen-04-leeg', {});
 
