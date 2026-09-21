@@ -427,8 +427,17 @@ class Schaken_Standen_Renderer {
 		$source = is_scalar($requested_source) && '' !== $requested_source
 			? sanitize_title((string) $requested_source)
 			: $this->index->default_source_id();
-		$season = sanitize_text_field(wp_unslash($_GET['schaken_standen_season']));
-		$file = sanitize_text_field(wp_unslash($_GET['schaken_standen_file']));
+		// A crafted query can hand over arrays (file[]=...); those are never a
+		// valid request, so answer 404 rather than lean on how the sanitizers
+		// happen to treat non-strings.
+		$season = wp_unslash($_GET['schaken_standen_season']);
+		$file = wp_unslash($_GET['schaken_standen_file']);
+		if (!is_scalar($season) || !is_scalar($file)) {
+			status_header(404);
+			exit;
+		}
+		$season = sanitize_text_field((string) $season);
+		$file = sanitize_text_field((string) $file);
 		$contents = $this->get_file_contents($source, $season, $file);
 		if (null === $contents) {
 			status_header(404);
@@ -460,7 +469,13 @@ class Schaken_Standen_Renderer {
 		}
 		// Against the configured path, not the cached one: a source removed from
 		// the settings must stop serving files before the transient expires.
-		$root = realpath($this->index->source_path($source));
+		// Check for the empty path explicitly: realpath('') answers the working
+		// directory, which would quietly turn that removed source into the web root.
+		$source_path = $this->index->source_path($source);
+		if ('' === $source_path) {
+			return null;
+		}
+		$root = realpath($source_path);
 		$path = realpath($root . DIRECTORY_SEPARATOR . $season . DIRECTORY_SEPARATOR . $relative_file);
 		$season_root = realpath($root . DIRECTORY_SEPARATOR . $season);
 		if (!$root || !$season_root || !$path || 0 !== strpos($path, $season_root . DIRECTORY_SEPARATOR) || !is_readable($path)) {
