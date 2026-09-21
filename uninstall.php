@@ -9,6 +9,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 
 delete_option('rokade_standings_settings');
 delete_transient('rokade_standings_index');
+delete_transient('rokade_standings_update');
 wp_clear_scheduled_hook('rokade_standings_refresh_index');
 
 // Installs that ran the plugin under its earlier internal name and were never
