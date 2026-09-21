@@ -18,11 +18,7 @@ if [ ! -f "${plugin_file}" ]; then
 	exit 1
 fi
 
-version="$(sed -nE 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*([^[:space:]]+).*/\1/p' "${plugin_file}" | head -n 1)"
-if [ -z "${version}" ]; then
-	printf 'Fout: geen pluginversie gevonden in %s.\n' "${plugin_file}" >&2
-	exit 1
-fi
+version="$("${script_dir}/plugin-header.sh" Version "${plugin_file}")"
 
 dist_dir="${project_dir}/dist"
 archive="${dist_dir}/${plugin_slug}-${version}.zip"
