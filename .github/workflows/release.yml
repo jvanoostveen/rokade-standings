@@ -1,0 +1,147 @@
+name: Release
+
+# Elke push naar main bouwt het pluginpakket en bewaart het als artifact. Staat
+# er een versie in rokade-standings.php waarvoor nog geen tag bestaat, dan wordt
+# die versie ook als GitHub-release gepubliceerd: de zip plus de update.json die
+# geïnstalleerde sites als update-feed gebruiken.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    name: PHP-syntaxcontrole
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Alle PHP-bestanden controleren
+        run: |
+          # Een pakket met een parsefout mag nooit als update bij een site
+          # terechtkomen, dus dit is de poort voor de release.
+          status=0
+          while IFS= read -r file; do
+            php -l "$file" || status=1
+          done < <(find . -path ./node_modules -prune -o -name '*.php' -print)
+          exit "$status"
+
+  release:
+    name: Pakket bouwen en publiceren
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # De tags bepalen of deze versie al gepubliceerd is en waar de
+          # changelog begint.
+          fetch-depth: 0
+
+      - name: Versie en releasestatus bepalen
+        id: meta
+        run: |
+          version="$(scripts/plugin-header.sh Version)"
+          tag="v${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+          # De constante is de terugval voor cache-busting van assets en staat
+          # in de user-agent van de updatecontrole. Hij moet de header volgen.
+          constant="$(sed -nE "s/^define\('ROKADE_STANDINGS_VERSION', '([^']+)'\).*/\1/p" rokade-standings.php)"
+          if [ "${constant}" != "${version}" ]; then
+            echo "::error::ROKADE_STANDINGS_VERSION is ${constant}, maar de pluginheader zegt ${version}."
+            exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Versie ${version} is al gereleased; er wordt alleen een artifact bewaard."
+            exit 0
+          fi
+
+          # GitHub wijst "latest" toe aan de laatst aangemaakte release, dus een
+          # per ongeluk verlaagd versienummer zou de update-feed terugzetten.
+          tags="$(git tag --list 'v*' --sort=-v:refname)"
+          previous="${tags%%$'\n'*}"
+          if [ -n "${previous}" ]; then
+            highest="$(printf '%s\n%s\n' "${previous#v}" "${version}" | sort -V | tail -n 1)"
+            if [ "${highest}" != "${version}" ]; then
+              echo "::error::Versie ${version} is lager dan de al gepubliceerde ${previous}."
+              exit 1
+            fi
+          fi
+
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
+      - name: Pluginpakket bouwen
+        run: scripts/package.sh
+
+      - name: Update-feed genereren
+        env:
+          REPO: ${{ github.repository }}
+        run: scripts/release-manifest.sh --output dist/update.json
+
+      - name: Pakket en feed controleren
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          # De feed wordt met de hand samengesteld, dus controleer dat het geldige
+          # JSON is en dat hij naar de zip van deze release wijst voordat hij
+          # gepubliceerd wordt.
+          python3 - <<'PY'
+          import json, os, sys, zipfile
+
+          version = os.environ["VERSION"]
+          archive = f"dist/rokade-standings-{version}.zip"
+
+          with open("dist/update.json", encoding="utf-8") as handle:
+              feed = json.load(handle)
+
+          problems = []
+          if feed.get("version") != version:
+              problems.append(f"feed meldt versie {feed.get('version')!r} in plaats van {version!r}")
+          if not feed.get("package", "").endswith(f"{version}/rokade-standings-{version}.zip"):
+              problems.append(f"package-URL past niet bij de release: {feed.get('package')!r}")
+
+          names = zipfile.ZipFile(archive).namelist()
+          for required in ("rokade-standings/rokade-standings.php", "rokade-standings/includes/class-rokade-standings-updater.php"):
+              if required not in names:
+                  problems.append(f"{required} ontbreekt in {archive}")
+
+          if problems:
+              sys.exit("Feed of pakket klopt niet:\n- " + "\n- ".join(problems))
+
+          print(f"{archive} en dist/update.json zijn in orde.")
+          PY
+
+      - name: Artifact bewaren
+        uses: actions/upload-artifact@v4
+        with:
+          name: rokade-standings-${{ steps.meta.outputs.version }}
+          path: |
+            dist/rokade-standings-${{ steps.meta.outputs.version }}.zip
+            dist/update.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Release publiceren
+        if: steps.meta.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          gh release create "${TAG}" \
+            "dist/rokade-standings-${VERSION}.zip" \
+            dist/update.json \
+            --target "${GITHUB_SHA}" \
+            --title "Rokade Standen ${VERSION}" \
+            --generate-notes
+          echo "::notice::Release ${TAG} gepubliceerd."
