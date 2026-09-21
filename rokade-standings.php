@@ -8,6 +8,7 @@
  * Requires PHP: 7.4
  * Author: Schaken in Hoogland
  * License: GPL-2.0-or-later
+ * Update URI: https://github.com/jvanoostveen/rokade-standings
  * Text Domain: rokade-standings
  */
 
@@ -23,6 +24,7 @@ define('ROKADE_STANDINGS_URL', plugin_dir_url(__FILE__));
 require_once ROKADE_STANDINGS_DIR . 'includes/class-rokade-standings-index.php';
 require_once ROKADE_STANDINGS_DIR . 'includes/class-rokade-standings-renderer.php';
 require_once ROKADE_STANDINGS_DIR . 'includes/class-rokade-standings-admin.php';
+require_once ROKADE_STANDINGS_DIR . 'includes/class-rokade-standings-updater.php';
 
 function rokade_standings() {
 	static $plugin = null;
@@ -71,6 +73,7 @@ add_action('plugins_loaded', function () {
 	// Not a wordpress.org plugin, so nothing loads the text domain for us.
 	load_plugin_textdomain('rokade-standings', false, dirname(plugin_basename(__FILE__)) . '/languages');
 	Rokade_Standings_Admin::register();
+	Rokade_Standings_Updater::register();
 	rokade_standings()->register();
 });
 

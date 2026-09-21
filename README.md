@@ -78,6 +78,30 @@ npm run package
 
 Het pakket verschijnt als `dist/rokade-standings-<versie>.zip`. Het bevat alleen de plugincode, assets en README; lokale exportbestanden, thema's, Docker-bestanden en ontwikkelbestanden blijven buiten het archief.
 
+## Releases en automatische updates
+
+Elke push naar `main` draait de workflow [`.github/workflows/release.yml`](.github/workflows/release.yml). Die controleert eerst de PHP-syntaxis van alle bestanden, bouwt daarna hetzelfde pakket als `npm run package` en bewaart het als build-artifact — ook wanneer de versie niet veranderd is, zodat er altijd een installeerbare zip van de laatste `main` klaarstaat.
+
+Een pull request naar `main` doorloopt dezelfde lint, bouw en controle, alleen zonder te publiceren. Een fout in het pakket of de feed valt daarmee op voordat hij op `main` staat.
+
+Staat er in `rokade-standings.php` een versie waarvoor nog geen tag `v<versie>` bestaat, dan publiceert de workflow die versie bovendien als GitHub-release met twee bestanden: de zip en `update.json`. Een release uitbrengen is dus niets meer dan het versienummer in de header én in `ROKADE_STANDINGS_VERSION` ophogen en dat naar `main` pushen. Een verlaagd versienummer wordt geweigerd, omdat GitHub de nieuwste release als "latest" aanwijst en de feed daarmee zou terugvallen.
+
+`update.json` is de update-feed. De plugin draagt de header `Update URI: https://github.com/jvanoostveen/rokade-standings`, waardoor WordPress voor updates niet bij wordpress.org maar bij [`Rokade_Standings_Updater`](includes/class-rokade-standings-updater.php) aanklopt. Die leest de feed op de vaste URL die GitHub altijd naar de nieuwste release laat wijzen:
+
+```
+https://github.com/jvanoostveen/rokade-standings/releases/latest/download/update.json
+```
+
+Een site ziet de nieuwe versie daarna gewoon bij **Dashboard → Updates** en in de pluginlijst, inclusief "Details bekijken" met de changelog, en kan automatische updates aanzetten. Het antwoord wordt twaalf uur bewaard; **Opnieuw controleren** wist die cache.
+
+Zolang de repository privé is, geeft die URL een 404. Dat is geen probleem: een mislukte controle (404, netwerkstoring, ongeldige JSON, of een pakket-URL die niet op GitHub staat) levert nooit een foutmelding of vertraagde beheerpagina op — WordPress hoort dan simpelweg niets over een nieuwe versie, en de mislukking wordt een uur onthouden zodat niet elke paginaweergave opnieuw op hetzelfde verzoek wacht. Zodra de repository openbaar is, werkt de feed zonder verdere wijziging.
+
+De feed is ook lokaal te bouwen, bijvoorbeeld om te controleren wat er gepubliceerd wordt:
+
+```sh
+npm run manifest
+```
+
 ## Upgraden vanaf 0.1.x
 
 Vanaf 0.2.0 heet alles in de plugin intern `rokade-standings`: de klassen, het tekstdomein, de CSS-klassen (`rokade-standings__…`), de optie `rokade_standings_settings`, het blok `rokade-standings/standings` en de queryparameters van het bestandsendpoint. Een bestaande installatie hoeft daar niets voor te doen:

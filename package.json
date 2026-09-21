@@ -2,6 +2,7 @@
   "name": "rokade-standings",
   "private": true,
   "scripts": {
-    "package": "bash scripts/package.sh"
+    "package": "bash scripts/package.sh",
+    "manifest": "bash scripts/release-manifest.sh"
   }
 }
