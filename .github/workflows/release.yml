@@ -4,17 +4,24 @@ name: Release
 # er een versie in rokade-standings.php waarvoor nog geen tag bestaat, dan wordt
 # die versie ook als GitHub-release gepubliceerd: de zip plus de update.json die
 # geïnstalleerde sites als update-feed gebruiken.
+#
+# Een pull request doorloopt alles behalve die laatste stap, zodat een fout in
+# het pakket of de feed opvalt voordat hij op main staat.
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
+  # Een lopende release afbreken zou een halve publicatie achterlaten; een
+  # verouderde PR-controle afbreken is juist gewenst.
   group: release-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint:
@@ -37,6 +44,9 @@ jobs:
     name: Pakket bouwen en publiceren
     needs: lint
     runs-on: ubuntu-latest
+    permissions:
+      # Alleen de laatste stap schrijft, en die draait niet op een pull request.
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,7 +142,7 @@ jobs:
           retention-days: 90
 
       - name: Release publiceren
-        if: steps.meta.outputs.release == 'true'
+        if: github.event_name != 'pull_request' && steps.meta.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.meta.outputs.tag }}

@@ -82,6 +82,8 @@ Het pakket verschijnt als `dist/rokade-standings-<versie>.zip`. Het bevat alleen
 
 Elke push naar `main` draait de workflow [`.github/workflows/release.yml`](.github/workflows/release.yml). Die controleert eerst de PHP-syntaxis van alle bestanden, bouwt daarna hetzelfde pakket als `npm run package` en bewaart het als build-artifact — ook wanneer de versie niet veranderd is, zodat er altijd een installeerbare zip van de laatste `main` klaarstaat.
 
+Een pull request naar `main` doorloopt dezelfde lint, bouw en controle, alleen zonder te publiceren. Een fout in het pakket of de feed valt daarmee op voordat hij op `main` staat.
+
 Staat er in `rokade-standings.php` een versie waarvoor nog geen tag `v<versie>` bestaat, dan publiceert de workflow die versie bovendien als GitHub-release met twee bestanden: de zip en `update.json`. Een release uitbrengen is dus niets meer dan het versienummer in de header én in `ROKADE_STANDINGS_VERSION` ophogen en dat naar `main` pushen. Een verlaagd versienummer wordt geweigerd, omdat GitHub de nieuwste release als "latest" aanwijst en de feed daarmee zou terugvallen.
 
 `update.json` is de update-feed. De plugin draagt de header `Update URI: https://github.com/jvanoostveen/rokade-standings`, waardoor WordPress voor updates niet bij wordpress.org maar bij [`Rokade_Standings_Updater`](includes/class-rokade-standings-updater.php) aanklopt. Die leest de feed op de vaste URL die GitHub altijd naar de nieuwste release laat wijzen:

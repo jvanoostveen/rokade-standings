@@ -19,14 +19,15 @@ tag.
 ```
 
 Elke push naar `main` bouwt sowieso een artifact. Alleen een versie waarvoor nog geen tag
-`v<versie>` bestaat, wordt ook als release gepubliceerd.
+`v<versie>` bestaat, wordt ook als release gepubliceerd. Een pull request draait dezelfde
+controles maar publiceert nooit, ook niet wanneer de versie erin wordt opgehoogd.
 
 ## Wat waar staat
 
 | Bestand | Rol |
 | --- | --- |
 | `rokade-standings.php` | De waarheid over de versie: de `Version:`-header én `ROKADE_STANDINGS_VERSION`. Draagt ook de `Update URI:`-header die WordPress naar de updater stuurt. |
-| `.github/workflows/release.yml` | Lint, bouw, controle, artifact, release. Draait op elke push naar `main` en handmatig. |
+| `.github/workflows/release.yml` | Lint, bouw, controle, artifact, release. Draait op elke push naar `main`, op elke pull request naar `main` (alles behalve publiceren) en handmatig. |
 | `scripts/plugin-header.sh` | Leest één header-veld. De enige plek met een regex voor het versienummer. |
 | `scripts/package.sh` | Bouwt `dist/rokade-standings-<versie>.zip`. Kopieert een **expliciete lijst**. |
 | `scripts/release-manifest.sh` | Bouwt `update.json`: de feed. Geen jq, met de hand samengesteld. |
