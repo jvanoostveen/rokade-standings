@@ -22,12 +22,13 @@ class Schaken_Standen_Renderer {
 	}
 
 	public function register_assets() {
-		$style_version = filemtime(SCHAKEN_STANDEN_DIR . 'assets/rokade-standings.css');
-		$script_version = filemtime(SCHAKEN_STANDEN_DIR . 'assets/rokade-standings.js');
-		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), $style_version);
-		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), $script_version, true);
+		wp_register_style('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.css', array(), $this->asset_version('rokade-standings.css'));
+		wp_register_script('schaken-standen', SCHAKEN_STANDEN_URL . 'assets/rokade-standings.js', array(), $this->asset_version('rokade-standings.js'), true);
 		// The same strings the server-rendered markup uses, so both stay in step once translated.
 		wp_localize_script('schaken-standen', 'schakenStandenL10n', array(
+			// The same base the server-rendered links use, so a fetch never drags
+			// the current page's own query string (preview, search) along.
+			'endpoint' => home_url('/'),
 			'ranking' => __('Ranglijst', 'schaken-standen'),
 			'cross' => __('Kruistabel', 'schaken-standen'),
 			'score' => __('Scoretabel', 'schaken-standen'),
@@ -39,9 +40,19 @@ class Schaken_Standen_Renderer {
 			'schaken-standen-block-editor',
 			SCHAKEN_STANDEN_URL . 'assets/rokade-standings-block.js',
 			array('wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render'),
-			SCHAKEN_STANDEN_VERSION,
+			$this->asset_version('rokade-standings-block.js'),
 			true
 		);
+	}
+
+	/**
+	 * Cache-busting version for one file in assets/. The modification time
+	 * changes with every edit, where the plugin version only changes on release;
+	 * a browser would otherwise keep an outdated editor script.
+	 */
+	private function asset_version($file) {
+		$mtime = @filemtime(SCHAKEN_STANDEN_DIR . 'assets/' . $file);
+		return $mtime ? (string) $mtime : SCHAKEN_STANDEN_VERSION;
 	}
 
 	/** Registers the dynamic Gutenberg equivalent of the [rokade] shortcode. */
@@ -119,8 +130,9 @@ class Schaken_Standen_Renderer {
 
 		$competitions = $data['sources'][$source]['seasons'][$season];
 		if ($attributes['categorie']) {
-			$competitions = array_values(array_filter($competitions, function ($competition) use ($attributes) {
-				return $competition['category'] === sanitize_title($attributes['categorie']);
+			$category = sanitize_title($attributes['categorie']);
+			$competitions = array_values(array_filter($competitions, function ($competition) use ($category) {
+				return $competition['category'] === $category;
 			}));
 		}
 		if (!$competitions) {

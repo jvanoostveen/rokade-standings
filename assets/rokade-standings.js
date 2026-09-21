@@ -28,8 +28,11 @@
     }).finally(function () { content.removeAttribute('aria-busy'); });
   }
 
+  // Same base as the links the server renders. Falling back to the page URL
+  // keeps an older cached script working, minus the parameters this script
+  // itself writes there.
   function endpointFor(root, file) {
-    var endpoint = new URL(window.location.href);
+    var endpoint = new URL(l10n.endpoint || window.location.href);
     endpoint.searchParams.delete('rokade_bron');
     endpoint.searchParams.delete('rokade_seizoen');
     endpoint.searchParams.delete('rokade_categorie');
