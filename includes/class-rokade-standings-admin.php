@@ -70,6 +70,8 @@ class Rokade_Standings_Admin {
 			echo '<p>' . esc_html__('Pas de labels voor doorgeefschaak en snelschaken aan zonder de exportbestanden te wijzigen.', 'rokade-standings') . '</p>';
 		}, 'rokade-standings');
 		add_settings_field('block_button_templates', __('Blokknoppen', 'rokade-standings'), array(__CLASS__, 'block_button_templates_field'), 'rokade-standings', 'rokade_standings_blocks');
+		add_settings_section('rokade_standings_advanced', __('Geavanceerd', 'rokade-standings'), '__return_false', 'rokade-standings');
+		add_settings_field('source_root', __('Hoofdmap van de bronnen', 'rokade-standings'), array(__CLASS__, 'source_root_field'), 'rokade-standings', 'rokade_standings_advanced');
 	}
 
 	public static function sanitize($input) {
@@ -79,6 +81,7 @@ class Rokade_Standings_Admin {
 
 		return array(
 			'sources' => sanitize_textarea_field($input['sources'] ?? ''),
+			'source_root' => trim(sanitize_text_field($input['source_root'] ?? '')),
 			'cache_minutes' => min(1440, max(1, absint($input['cache_minutes'] ?? 15))),
 			'internal_group_order' => sanitize_textarea_field($input['internal_group_order'] ?? ''),
 			'block_button_templates' => sanitize_textarea_field($input['block_button_templates'] ?? ''),
@@ -87,9 +90,16 @@ class Rokade_Standings_Admin {
 
 	public static function sources_field() {
 		$settings = self::index()->settings();
-		printf('<textarea class="large-text code" rows="4" name="rokade_standings_settings[sources]" placeholder="/var/www/html/wp-content/uploads/standen | Jeugd">%s</textarea>', esc_textarea($settings['sources']));
+		printf('<textarea class="large-text code" rows="4" name="rokade_standings_settings[sources]" placeholder="/wp-content/uploads/standen | Jeugd">%s</textarea>', esc_textarea($settings['sources']));
 		echo '<p class="description">' . esc_html__('Eén bron per regel, in de vorm “pad | label”. Zonder label wordt de mapnaam gebruikt. Het label bepaalt ook de naam waarmee de bron in de shortcode wordt gekozen, bijvoorbeeld “Jeugd” wordt bron="jeugd".', 'rokade-standings') . '</p>';
+		echo '<p class="description">' . esc_html(sprintf(__('Het pad telt vanaf de hoofdmap, nu %s. “/standen” is dus de map standen daarin.', 'rokade-standings'), self::index()->source_root() ?: '/')) . '</p>';
 		echo '<p class="description">' . esc_html__('Let op: elk .htm- of .html-bestand onder zo’n pad wordt zonder inloggen openbaar leesbaar via de site. Wijs dus precies een standenmap aan en niets erboven.', 'rokade-standings') . '</p>';
+	}
+
+	public static function source_root_field() {
+		$settings = self::index()->settings();
+		printf('<input type="text" class="regular-text code" name="rokade_standings_settings[source_root]" value="%s" placeholder="%s">', esc_attr($settings['source_root']), esc_attr(untrailingslashit(ABSPATH)));
+		echo '<p class="description">' . esc_html__('De map waar alle bronpaden vanaf tellen. Leeg laten gebruikt de WordPress-map. Staan de exports buiten de site, vul dan die map in, of “/” om volledige serverpaden te gebruiken.', 'rokade-standings') . '</p>';
 	}
 
 	public static function cache_field() {

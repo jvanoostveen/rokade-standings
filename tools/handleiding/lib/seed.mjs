@@ -8,6 +8,7 @@ export const VOORBEELD = {
 
 export const INSTELLINGEN = {
 	sources: '/standen | Jeugd\n/senioren | Senioren',
+	source_root: '',
 	cache_minutes: 15,
 	internal_group_order: 'Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon',
 	block_button_templates: 'doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}',

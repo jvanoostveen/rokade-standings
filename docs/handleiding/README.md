@@ -65,13 +65,16 @@ Een **bronpad** is de map waarin de seizoensmappen staan — dus de map waar
 in de vorm `pad | label`:
 
 ```
-/var/www/html/wp-content/uploads/standen | Jeugd
-/var/www/html/wp-content/uploads/senioren | Senioren
+/wp-content/uploads/standen | Jeugd
+/wp-content/uploads/senioren | Senioren
 ```
 
 ![Het veld Bronpaden op de server](media/schermafbeeldingen/instellen-05-bronpaden.png)
 
-- Het **pad** is de absolute locatie op de server. Kopieer de Rokade-export naar een map
+- Het **pad** telt vanaf de WordPress-map: `/wp-content/uploads/standen`, of `/standen`
+  voor een map direct in de webroot. Het volledige serverpad hoef je dus niet te weten.
+  Staan de exports buiten de site, zie dan [Hoofdmap van de bronnen](#8-hoofdmap-van-de-bronnen-geavanceerd).
+  Kopieer de Rokade-export naar een map
   buiten de plugin, bijvoorbeeld onder `wp-content/uploads/`; bij een plugin-update blijft
   hij dan staan.
 - Het **label** is de naam die je in het blok terugziet, en bepaalt ook de naam in de
@@ -94,7 +97,7 @@ hoe vaak WP-Cron hem op de achtergrond ververst.
 
 Een korte duur betekent dat een nieuwe export sneller zichtbaar is; een lange duur scheelt
 werk op de server. Tussen 5 en 60 minuten werkt in de praktijk prima. Je hoeft er niet op te
-wachten: met **Nu opnieuw indexeren** (stap 8) is een nieuwe export meteen zichtbaar.
+wachten: met **Nu opnieuw indexeren** (stap 9) is een nieuwe export meteen zichtbaar.
 
 ### 6. Groepen en volgorde
 
@@ -135,31 +138,43 @@ snelschaken | Blok {nummer}
 
 ![Het veld Blokknoppen](media/schermafbeeldingen/instellen-08-blokknoppen.png)
 
+### 8. Hoofdmap van de bronnen (geavanceerd)
+
+Onder **Geavanceerd** staat de map waar alle bronpaden vanaf tellen. Meestal laat je dit
+veld leeg: dan is dat de WordPress-map, en onder het veld Bronpaden zie je welke map dat
+op jouw server is.
+
+Vul het alleen in als de exports buiten de site staan. Met bijvoorbeeld `/srv/rokade` als
+hoofdmap wordt `/standen` de map `/srv/rokade/standen`. Met `/` als hoofdmap geef je bij
+de bronpaden het volledige serverpad op.
+
+![Het veld Hoofdmap van de bronnen](media/schermafbeeldingen/instellen-09-hoofdmap.png)
+
 Klik daarna op **Wijzigingen opslaan**.
 
-### 8. Controleren en verversen
+### 9. Controleren en verversen
 
 Na het opslaan ververst de plugin de index en toont hij per bron wat er is gevonden.
 
-![De opgeslagen instellingen](media/schermafbeeldingen/instellen-09-opgeslagen.png)
+![De opgeslagen instellingen](media/schermafbeeldingen/instellen-10-opgeslagen.png)
 
 Onder **Index verversen** staat per bron het label, de naam voor de shortcode en het aantal
 gevonden seizoenen. Staat er `0 seizoenen gevonden`, dan klopt het pad niet of kan de
 webserver de map niet lezen.
 
-![Gevonden bronnen en seizoenen](media/schermafbeeldingen/instellen-10-bronnen-gevonden.png)
+![Gevonden bronnen en seizoenen](media/schermafbeeldingen/instellen-11-bronnen-gevonden.png)
 
 Zet je een nieuwe export op de server, dan haalt **Nu opnieuw indexeren** die meteen binnen,
 zonder te wachten tot de cache verloopt.
 
-![Melding dat de index is vernieuwd](media/schermafbeeldingen/instellen-11-index-vernieuwd.png)
+![Melding dat de index is vernieuwd](media/schermafbeeldingen/instellen-12-index-vernieuwd.png)
 
-### 9. Shortcode (alternatief voor het blok)
+### 10. Shortcode (alternatief voor het blok)
 
 Onderaan de instellingenpagina staat de shortcode. Die is handig in een thema of widget waar
 geen blok-editor is.
 
-![De shortcode op de instellingenpagina](media/schermafbeeldingen/instellen-12-shortcode.png)
+![De shortcode op de instellingenpagina](media/schermafbeeldingen/instellen-13-shortcode.png)
 
 ```
 [rokade bron="jeugd" seizoen="2026-2027"]
