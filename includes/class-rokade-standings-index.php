@@ -14,6 +14,7 @@ class Rokade_Standings_Index {
 	public static function defaults() {
 		return array(
 			'sources' => '',
+			'source_root' => '',
 			'cache_minutes' => 15,
 			'internal_group_order' => "Starters\nPupillen\nJunioren\nVerkenners\nMeester-/Kroon\nMeester\nKroon",
 			'block_button_templates' => "doorgeefschaak | Blok {nummer}\nsnelschaken | Blok {nummer}",
@@ -55,10 +56,11 @@ class Rokade_Standings_Index {
 
 		foreach ($lines as $line) {
 			$parts = array_map('trim', explode('|', $line, 2));
-			$path = untrailingslashit($parts[0]);
-			if ('' === $path) {
+			$entered = untrailingslashit($parts[0]);
+			if ('' === $entered) {
 				continue;
 			}
+			$path = $this->resolve_path($entered);
 
 			$label = (isset($parts[1]) && '' !== $parts[1]) ? $parts[1] : basename($path);
 			$id = sanitize_title($label);
@@ -79,6 +81,25 @@ class Rokade_Standings_Index {
 		}
 
 		return $sources;
+	}
+
+	/**
+	 * The directory every source path is read from: the WordPress directory,
+	 * unless the advanced setting names another one ("/" for the server root).
+	 */
+	public function source_root() {
+		$root = trim((string) $this->settings()['source_root']);
+		return untrailingslashit('' === $root ? ABSPATH : $root);
+	}
+
+	private function resolve_path($path) {
+		$root = $this->source_root();
+		// Before the root setting a source was a full server path. One that
+		// already sits under the root keeps working instead of being doubled.
+		if ('' !== $root && ($path === $root || 0 === strpos($path, $root . '/'))) {
+			return $path;
+		}
+		return $root . '/' . ltrim($path, '/\\');
 	}
 
 	public function source_path($source_id) {

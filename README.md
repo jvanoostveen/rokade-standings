@@ -26,7 +26,7 @@ De geanonimiseerde demo-export staat al in `demo/`, dus een clone is direct klaa
 /standen | Jeugd
 ```
 
-De lokale demo-exportmappen worden in de container read-only gemount: `demo/jeugd` als `/standen` en `demo/senioren` als `/senioren`. Een export als `demo/jeugd/2026-2027/…` is in de container dus beschikbaar als `/standen/2026-2027/…`. Met twee bronnen wordt het veld:
+Bronpaden tellen vanaf de WordPress-map (`/var/www/html` in de container). De lokale demo-exportmappen worden daar read-only in gemount: `demo/jeugd` als `/var/www/html/standen` en `demo/senioren` als `/var/www/html/senioren`. Een export als `demo/jeugd/2026-2027/…` is voor de plugin dus `/standen/2026-2027/…`, net als een map in de webroot van een echte site. Met twee bronnen wordt het veld:
 
 ```
 /standen | Jeugd
@@ -120,11 +120,13 @@ wp-content/uploads/standen/2026-2027/kroon/C1Index.htm
 wp-content/uploads/senioren/2026-2027/kroon/C1Index.htm
 ```
 
-Vul dan per regel de absolute locatie plus een label in:
+Vul dan per regel het pad vanaf de WordPress-map plus een label in:
 
 ```
-/var/www/html/wp-content/uploads/standen | Jeugd
-/var/www/html/wp-content/uploads/senioren | Senioren
+/wp-content/uploads/standen | Jeugd
+/wp-content/uploads/senioren | Senioren
 ```
+
+Alle bronpaden tellen vanaf de **hoofdmap van de bronnen** (onder **Geavanceerd** op de instellingenpagina). Leeg is dat de WordPress-map (`ABSPATH`), zodat het volledige serverpad van de host niet bekend hoeft te zijn. Staan de exports buiten de site, vul dan die map in als hoofdmap, of `/` om volledige serverpaden te gebruiken. Een bronpad dat al met de hoofdmap begint, zoals een volledig pad uit een eerdere versie, wordt niet nog eens aangevuld.
 
 De plugin accepteert alleen seizoensmappen die door de index zijn gevonden en valideert ieder verzoek tegen het bronpad van de gekozen bron, zodat een URL nooit andere serverbestanden kan uitlezen. Verdwijnt een bron uit de instellingen, dan stoppen de bijbehorende bestanden direct met laden; daar wordt niet op de cache gewacht.
