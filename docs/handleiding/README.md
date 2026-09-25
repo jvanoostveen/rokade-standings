@@ -148,31 +148,33 @@ Vul het alleen in als de exports buiten de site staan. Met bijvoorbeeld `/srv/ro
 hoofdmap wordt `/standen` de map `/srv/rokade/standen`. Met `/` als hoofdmap geef je bij
 de bronpaden het volledige serverpad op.
 
+![Het veld Hoofdmap van de bronnen](media/schermafbeeldingen/instellen-09-hoofdmap.png)
+
 Klik daarna op **Wijzigingen opslaan**.
 
 ### 9. Controleren en verversen
 
 Na het opslaan ververst de plugin de index en toont hij per bron wat er is gevonden.
 
-![De opgeslagen instellingen](media/schermafbeeldingen/instellen-09-opgeslagen.png)
+![De opgeslagen instellingen](media/schermafbeeldingen/instellen-10-opgeslagen.png)
 
 Onder **Index verversen** staat per bron het label, de naam voor de shortcode en het aantal
 gevonden seizoenen. Staat er `0 seizoenen gevonden`, dan klopt het pad niet of kan de
 webserver de map niet lezen.
 
-![Gevonden bronnen en seizoenen](media/schermafbeeldingen/instellen-10-bronnen-gevonden.png)
+![Gevonden bronnen en seizoenen](media/schermafbeeldingen/instellen-11-bronnen-gevonden.png)
 
 Zet je een nieuwe export op de server, dan haalt **Nu opnieuw indexeren** die meteen binnen,
 zonder te wachten tot de cache verloopt.
 
-![Melding dat de index is vernieuwd](media/schermafbeeldingen/instellen-11-index-vernieuwd.png)
+![Melding dat de index is vernieuwd](media/schermafbeeldingen/instellen-12-index-vernieuwd.png)
 
 ### 10. Shortcode (alternatief voor het blok)
 
 Onderaan de instellingenpagina staat de shortcode. Die is handig in een thema of widget waar
 geen blok-editor is.
 
-![De shortcode op de instellingenpagina](media/schermafbeeldingen/instellen-12-shortcode.png)
+![De shortcode op de instellingenpagina](media/schermafbeeldingen/instellen-13-shortcode.png)
 
 ```
 [rokade bron="jeugd" seizoen="2026-2027"]
