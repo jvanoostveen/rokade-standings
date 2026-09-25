@@ -28,7 +28,7 @@ jobs:
     name: PHP-syntaxcontrole
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Alle PHP-bestanden controleren
         run: |
@@ -48,7 +48,7 @@ jobs:
       # Alleen de laatste stap schrijft, en die draait niet op een pull request.
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # De tags bepalen of deze versie al gepubliceerd is en waar de
           # changelog begint.
@@ -132,7 +132,7 @@ jobs:
           PY
 
       - name: Artifact bewaren
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rokade-standings-${{ steps.meta.outputs.version }}
           path: |
