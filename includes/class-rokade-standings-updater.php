@@ -70,7 +70,17 @@ class Rokade_Standings_Updater {
 			'tested' => $release['tested'],
 			'requires' => $release['requires'],
 			'requires_php' => $release['requires_php'],
+			'icons' => self::icons(),
 		);
+	}
+
+	/**
+	 * The icon Dashboard → Updates shows next to the update. It comes from the
+	 * installed copy rather than the feed, so it needs no extra request and
+	 * cannot be swapped by whoever controls the release.
+	 */
+	private static function icons() {
+		return array('svg' => ROKADE_STANDINGS_URL . 'assets/icon.svg');
 	}
 
 	/**
