@@ -88,11 +88,13 @@ $offered = $with_feed($http($newer), function () use ($file) {
 	$details = plugins_api('plugin_information', array('slug' => 'rokade-standings'));
 	return array(
 		'response' => isset($updates->response[$file]) ? $updates->response[$file]->new_version : null,
+		'icon' => isset($updates->response[$file]->icons['svg']) ? $updates->response[$file]->icons['svg'] : null,
 		'details' => $details instanceof WP_Error ? null : $details->version,
 		'changelog' => $details instanceof WP_Error ? 0 : strlen($details->sections['changelog']),
 	);
 });
 $check('nieuwere versie', 'wp_update_plugins() biedt 9.9.9 aan', '9.9.9' === $offered['response']);
+$check('icoon', 'Updates toont assets/icon.svg', ROKADE_STANDINGS_URL . 'assets/icon.svg' === $offered['icon'] && file_exists(ROKADE_STANDINGS_DIR . 'assets/icon.svg'));
 $check('details-modal', 'plugins_api levert de changelog', '9.9.9' === $offered['details'] && $offered['changelog'] > 0);
 
 // 3. Dezelfde versie: geen update, wel no_update zodat auto-update aan kan.
