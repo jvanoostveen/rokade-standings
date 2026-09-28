@@ -561,6 +561,23 @@ class Rokade_Standings_Renderer {
 		// script; a stray target from a legacy export would open a bare fragment
 		// in a new tab instead, without rel="noopener".
 		unset($allowed['a']['target']);
-		return wp_kses($html, $allowed);
+		return $this->move_link_padding_outside(wp_kses($html, $allowed));
+	}
+
+	/**
+	 * Rokade pads names in its tables with spaces and &nbsp; inside the link
+	 * ("Sven&nbsp; </a>"), so the underline runs on past the name. Move that
+	 * padding just outside the link: the column keeps its width, the underline
+	 * stops at the last letter.
+	 */
+	private function move_link_padding_outside($html) {
+		$padding = '(?:\s|&nbsp;|&#160;|&#xa0;|\xC2\xA0)*';
+		$moved = preg_replace_callback('/(<a\b[^>]*>)(' . $padding . ')(.*?)(' . $padding . ')(<\/a>)/is', function ($matches) {
+			if ('' === $matches[3]) {
+				return $matches[0];
+			}
+			return $matches[2] . $matches[1] . $matches[3] . $matches[5] . $matches[4];
+		}, $html);
+		return null === $moved ? $html : $moved;
 	}
 }
