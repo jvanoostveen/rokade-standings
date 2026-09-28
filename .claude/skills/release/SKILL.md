@@ -105,7 +105,7 @@ wat `parse()` niet vertrouwt, wordt `false`.
 - **De repo is nu privé, dus de feed geeft 404.** Dat is het verwachte gedrag, geen bug.
   Zodra de repo openbaar is, werkt de feed zonder wijziging in de plugin.
 - **Bij verhuizen of hernoemen van de repository** moeten de `Update URI:`-header,
-  `Rokade_Standings_Updater::REPOSITORY` en de URL's in de README allemaal mee. De workflow
+  `Rokade_Standings_Updater::REPOSITORY` en de URL's in `docs/ontwikkeling.md` allemaal mee. De workflow
   merkt het niet, want die haalt de repo uit `github.repository`.
 - **`update.json` wordt met de hand in bash samengesteld.** Een nieuw veld met vrije tekst
   moet door `json_escape()`; HTML voor `sections` bovendien door `html_escape()`.

@@ -24,8 +24,8 @@ npx playwright install chromium
 cp .env.example .env   # vul WP_ADMIN_PASSWORD in
 ```
 
-De geanonimiseerde demo staat al onder `demo/jeugd/` en `demo/senioren/`, precies zoals de
-hoofd-README beschrijft; het scenario verwijst naar `/standen` en `/senioren` in de
+De geanonimiseerde demo staat al onder `demo/jeugd/` en `demo/senioren/`, precies zoals
+[`docs/ontwikkeling.md`](../../docs/ontwikkeling.md) beschrijft; het scenario verwijst naar `/standen` en `/senioren` in de
 container. Daardoor zijn nieuwe schermafbeeldingen en video's altijd veilig met de
 meegeleverde gegevens op te nemen.
 
