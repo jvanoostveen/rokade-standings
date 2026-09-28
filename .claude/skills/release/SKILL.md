@@ -102,8 +102,10 @@ wat `parse()` niet vertrouwt, wordt `false`.
   stilzwijgend buiten. De CI-controle kijkt maar naar twee bestanden en vangt dat niet.
 - **`dist/` staat in `.gitignore`.** Nooit committen; de zip komt uit de release of het
   artifact.
-- **De repo is nu privé, dus de feed geeft 404.** Dat is het verwachte gedrag, geen bug.
-  Zodra de repo openbaar is, werkt de feed zonder wijziging in de plugin.
+- **De repo is openbaar, dus de feed hoort 200 te geven.** Een 404 betekent dat de nieuwste
+  release geen `update.json` heeft, of dat de repo weer privé is gezet; elke site ziet dan
+  geen updates meer. Controleer met
+  `curl -sIL -o /dev/null -w "%{http_code}\n" <feed-URL>`.
 - **Bij verhuizen of hernoemen van de repository** moeten de `Update URI:`-header,
   `Rokade_Standings_Updater::REPOSITORY` en de URL's in `docs/ontwikkeling.md` allemaal mee. De workflow
   merkt het niet, want die haalt de repo uit `github.repository`.
